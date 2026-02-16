@@ -6,20 +6,21 @@ A clean, responsive personal website built with HTML, CSS, and JavaScript.
 
 ```
 personal-website/
-├── assets/             # Media and static assets
-│   ├── fonts/          # Custom web fonts
-│   ├── icons/          # Favicon and icon files
-│   └── images/         # Image files
-├── public/             # Public root files (robots.txt, sitemap, etc.)
-├── src/                # Source code
-│   ├── css/            # Stylesheets
+├── src/                  # All source files
+│   ├── assets/           # Static assets
+│   │   ├── fonts/        # Custom web fonts
+│   │   ├── icons/        # Favicon and icon files
+│   │   └── images/       # Image files
+│   ├── css/              # Stylesheets
 │   │   └── styles.css
-│   ├── js/             # JavaScript
+│   ├── js/               # JavaScript
 │   │   └── main.js
-│   └── index.html      # Main HTML page
-├── dist/               # Production build output (git-ignored)
-├── build.js            # Build script
-├── package.json        # Project metadata and scripts
+│   ├── index.html        # Main HTML page
+│   ├── robots.txt        # Search engine crawl rules
+│   └── sitemap.xml       # XML sitemap for SEO
+├── dist/                 # Production build output (git-ignored)
+├── build.js              # Build script
+├── package.json          # Project metadata and scripts
 └── README.md
 ```
 

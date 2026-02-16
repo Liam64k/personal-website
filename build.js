@@ -4,8 +4,6 @@ const { execSync, exec } = require("child_process");
 
 const DIST = path.join(__dirname, "dist");
 const SRC = path.join(__dirname, "src");
-const PUBLIC = path.join(__dirname, "public");
-const ASSETS = path.join(__dirname, "assets");
 
 const isWatch = process.argv.includes("--watch");
 
@@ -27,7 +25,7 @@ function copyDir(src, dest) {
 }
 
 /**
- * Run the build: clean dist, copy public, assets, and src into dist.
+ * Run the build: clean dist and copy src into dist.
  */
 function build() {
   const start = Date.now();
@@ -36,20 +34,8 @@ function build() {
   fs.rmSync(DIST, { recursive: true, force: true });
   fs.mkdirSync(DIST, { recursive: true });
 
-  // Copy public files to dist root (robots.txt, sitemap.xml, etc.)
-  if (fs.existsSync(PUBLIC)) {
-    copyDir(PUBLIC, DIST);
-  }
-
-  // Copy assets to dist/assets
-  if (fs.existsSync(ASSETS)) {
-    copyDir(ASSETS, path.join(DIST, "assets"));
-  }
-
-  // Copy src files to dist (HTML, CSS, JS)
-  if (fs.existsSync(SRC)) {
-    copyDir(SRC, DIST);
-  }
+  // Copy all source files to dist
+  copyDir(SRC, DIST);
 
   const elapsed = Date.now() - start;
   console.log(`Build completed in ${elapsed}ms → dist/`);
@@ -69,13 +55,10 @@ if (isWatch) {
   server.stdout.pipe(process.stdout);
   server.stderr.pipe(process.stderr);
 
-  // Watch src, public, and assets for changes
-  const watchDirs = [SRC, PUBLIC, ASSETS].filter(fs.existsSync);
-  for (const dir of watchDirs) {
-    fs.watch(dir, { recursive: true }, (event, filename) => {
-      if (!filename) return;
-      console.log(`\nChange detected: ${filename}`);
-      build();
-    });
-  }
+  // Watch src for changes
+  fs.watch(SRC, { recursive: true }, (event, filename) => {
+    if (!filename) return;
+    console.log(`\nChange detected: ${filename}`);
+    build();
+  });
 }
