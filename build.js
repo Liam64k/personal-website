@@ -9,28 +9,43 @@ const DIST = path.join(ROOT, "dist");
 const TEMPLATE_DIR = path.join(SRC, "templates");
 
 // ── Template definitions ───────────────────────────────────────────────────────
-// Add new templates here — each entry maps a {{PLACEHOLDER}} to a file.
-const TEMPLATES = {
-  "{{NAV}}": path.join(TEMPLATE_DIR, "nav.html"),
-  "{{FOOTER}}": path.join(TEMPLATE_DIR, "footer.html"),
-};
+// Each entry maps a section name to a template file.
+//
+// In your HTML, add paired boundary comments:
+//   <!-- begin:nav --><!-- end:nav -->
+//   <!-- begin:footer --><!-- end:footer -->
+//
+// The build replaces everything BETWEEN the boundaries with the template
+// content, but keeps the boundary comments themselves. This means the
+// build is idempotent — you can run it on source files OR on already-built
+// output and it will always produce the correct result.
+const TEMPLATES = [
+  { name: "nav",    file: path.join(TEMPLATE_DIR, "nav.html") },
+  { name: "footer", file: path.join(TEMPLATE_DIR, "footer.html") },
+];
 
 // ── Load templates ─────────────────────────────────────────────────────────────
 function loadTemplates() {
-  const loaded = {};
-  for (const [placeholder, filePath] of Object.entries(TEMPLATES)) {
-    if (!fs.existsSync(filePath)) {
-      console.warn(`  ⚠  Template missing: ${path.relative(ROOT, filePath)} (placeholder ${placeholder} will be left as-is)`);
+  const loaded = [];
+  for (const tpl of TEMPLATES) {
+    if (!fs.existsSync(tpl.file)) {
+      console.warn(`  ⚠  Template missing: ${path.relative(ROOT, tpl.file)} (<!-- begin:${tpl.name} --> will be left as-is)`);
       continue;
     }
-    const content = fs.readFileSync(filePath, "utf8").trim();
+    const content = fs.readFileSync(tpl.file, "utf8").trim();
     if (!content) {
-      console.warn(`  ⚠  Template empty: ${path.relative(ROOT, filePath)}`);
+      console.warn(`  ⚠  Template empty: ${path.relative(ROOT, tpl.file)}`);
       continue;
     }
-    loaded[placeholder] = content;
+    // Matches <!-- begin:name --> ... anything ... <!-- end:name -->
+    // across multiple lines, non-greedy
+    const regex = new RegExp(
+      `(<!--\\s*begin:${tpl.name}\\s*-->)[\\s\\S]*?(<!--\\s*end:${tpl.name}\\s*-->)`,
+      "gi"
+    );
+    loaded.push({ name: tpl.name, regex, content });
   }
-  if (Object.keys(loaded).length === 0) {
+  if (loaded.length === 0) {
     console.error("  ✖  No templates loaded — HTML files will not be processed.");
   }
   return loaded;
@@ -41,18 +56,27 @@ function injectTemplates(html, templates) {
   let result = html;
   const injected = [];
 
-  for (const [placeholder, content] of Object.entries(templates)) {
-    if (result.includes(placeholder)) {
-      result = result.split(placeholder).join(content);
-      injected.push(placeholder);
+  for (const { name, regex, content } of templates) {
+    // Reset regex state before use
+    regex.lastIndex = 0;
+    if (regex.test(result)) {
+      regex.lastIndex = 0;
+      // Replace everything between boundaries, keeping the boundary comments
+      result = result.replace(regex, `$1\n${content}\n  $2`);
+      injected.push(name);
     }
   }
 
-  // Warn about any remaining unresolved {{…}} placeholders
-  const unresolved = result.match(/\{\{[A-Z_]+\}\}/g);
-  if (unresolved) {
-    const unique = [...new Set(unresolved)];
-    console.warn(`      ⚠  Unresolved placeholders: ${unique.join(", ")}`);
+  // Warn about any unmatched <!-- begin:… --> without a corresponding end
+  const opens = result.match(/<!--\s*begin:(\w+)\s*-->/gi) || [];
+  for (const open of opens) {
+    const nameMatch = open.match(/begin:(\w+)/i);
+    if (nameMatch) {
+      const endRe = new RegExp(`<!--\\s*end:${nameMatch[1]}\\s*-->`, "i");
+      if (!endRe.test(result)) {
+        console.warn(`      ⚠  Found ${open} but no matching <!-- end:${nameMatch[1]} -->`);
+      }
+    }
   }
 
   return { html: result, injected };
