@@ -5,39 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-  <!-- Primary SEO Meta Tags -->
   <title>Liam Stier — Personal Website</title>
   <meta name="title" content="Liam Stier — Personal Website">
   <meta name="description" content="Welcome to the personal website of Liam Stier. Explore my work, projects, and get in touch.">
   <meta name="author" content="Liam Stier">
   <meta name="robots" content="index, follow">
 
-  <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://liamstier.com/">
   <meta property="og:title" content="Liam Stier — Personal Website">
   <meta property="og:description" content="Welcome to the personal website of Liam Stier. Explore my work, projects, and get in touch.">
-  <!-- <meta property="og:image" content="https://liamstier.com/assets/images/og-image.jpg"> -->
 
-  <!-- Twitter / X -->
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://liamstier.com/">
   <meta property="twitter:title" content="Liam Stier — Personal Website">
   <meta property="twitter:description" content="Welcome to the personal website of Liam Stier. Explore my work, projects, and get in touch.">
-  <!-- <meta property="twitter:image" content="https://liamstier.com/assets/images/og-image.jpg"> -->
 
-  <!-- Canonical URL -->
   <link rel="canonical" href="https://liamstier.com/">
 
-  <!-- Favicon -->
-  <!-- <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png"> -->
-  <!-- <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16x16.png"> -->
-  <!-- <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png"> -->
-
-  <!-- Stylesheet -->
   <link rel="stylesheet" href="css/styles.css">
 
-  <!-- Structured Data (JSON-LD) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -48,32 +35,13 @@
   }
   </script>
 </head>
+
+
+
+
 <body>
-
-  <!-- Skip Navigation (Accessibility) -->
-  <a href="#main" class="skip-link">Skip to main content</a>
-
-  <!-- Header -->
-  <header class="header" role="banner">
-    <nav class="nav" aria-label="Primary navigation">
-      <a href="/" class="nav-logo">Liam Stier</a>
-      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
-        <span class="nav-toggle-bar"></span>
-        <span class="nav-toggle-bar"></span>
-        <span class="nav-toggle-bar"></span>
-      </button>
-      <ul class="nav-menu">
-        <li><a href="#about" class="nav-link">About</a></li>
-        <li><a href="#projects" class="nav-link">Projects</a></li>
-        <li><a href="#contact" class="nav-link">Contact</a></li>
-      </ul>
-    </nav>
-  </header>
-
-  <!-- Main Content -->
+  {{NAV}}
   <main id="main">
-
-    <!-- Hero Section -->
     <section class="hero" aria-label="Introduction">
       <div class="container">
         <h1 class="hero-title">Hi, I'm <span class="highlight">Liam Stier</span></h1>
@@ -81,8 +49,6 @@
         <a href="#about" class="btn btn-primary">Learn More</a>
       </div>
     </section>
-
-    <!-- About Section -->
     <section id="about" class="section about">
       <div class="container">
         <h2 class="section-title">About Me</h2>
@@ -92,8 +58,6 @@
         </p>
       </div>
     </section>
-
-    <!-- Projects Section -->
     <section id="projects" class="section projects">
       <div class="container">
         <h2 class="section-title">Projects</h2>
@@ -116,8 +80,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Contact Section -->
     <section id="contact" class="section contact">
       <div class="container">
         <h2 class="section-title">Get in Touch</h2>
@@ -141,15 +103,7 @@
     </section>
 
   </main>
-
-  <!-- Footer -->
-  <footer class="footer" role="contentinfo">
-    <div class="container">
-      <p>&copy; 2026 Liam Stier. All rights reserved.</p>
-    </div>
-  </footer>
-
-  <!-- Scripts -->
+  {{FOOTER}}
   <script src="js/main.js"></script>
 </body>
 </html>

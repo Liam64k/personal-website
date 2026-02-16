@@ -1,13 +1,5 @@
-/**
- * main.js — Liam Stier Personal Website
- */
-
 (function () {
   "use strict";
-
-  /* ==========================================================
-     Mobile Navigation Toggle
-     ========================================================== */
 
   const navToggle = document.querySelector(".nav-toggle");
   const navMenu = document.querySelector(".nav-menu");
@@ -18,8 +10,6 @@
       navToggle.classList.toggle("active");
       navToggle.setAttribute("aria-expanded", isOpen);
     });
-
-    // Close menu when a nav link is clicked
     navMenu.querySelectorAll(".nav-link").forEach(function (link) {
       link.addEventListener("click", function () {
         navMenu.classList.remove("open");
@@ -28,10 +18,6 @@
       });
     });
   }
-
-  /* ==========================================================
-     Smooth Scroll for Anchor Links
-     ========================================================== */
 
   document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
     anchor.addEventListener("click", function (e) {
@@ -51,10 +37,6 @@
       }
     });
   });
-
-  /* ==========================================================
-     Active Nav Link on Scroll
-     ========================================================== */
 
   var sections = document.querySelectorAll("section[id]");
   var navLinks = document.querySelectorAll(".nav-link");
@@ -81,10 +63,6 @@
   window.addEventListener("scroll", highlightNavOnScroll);
   highlightNavOnScroll();
 
-  /* ==========================================================
-     Contact Form Handler (placeholder)
-     ========================================================== */
-
   var contactForm = document.querySelector(".contact-form");
 
   if (contactForm) {
@@ -99,8 +77,6 @@
         alert("Please fill in all fields.");
         return;
       }
-
-      // TODO: Replace with actual form submission (e.g., Formspree, Netlify Forms, or a custom API)
       console.log("Form submitted:", { name: name, email: email, message: message });
       alert("Thanks for your message, " + name + "! I'll get back to you soon.");
       contactForm.reset();
