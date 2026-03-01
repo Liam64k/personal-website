@@ -1,85 +1,61 @@
+import LiquidBackground from "https://cdn.jsdelivr.net/npm/threejs-components@0.0.27/build/backgrounds/liquid1.min.js";
+
 (function () {
   "use strict";
 
-  const navToggle = document.querySelector(".nav-toggle");
-  const navMenu = document.querySelector(".nav-menu");
+  /* ── Mobile nav toggle ── */
+  const toggle = document.querySelector(".nav-toggle");
+  const links = document.querySelector(".nav-links");
+  const socials = document.querySelector(".nav-socials");
 
-  if (navToggle && navMenu) {
-    navToggle.addEventListener("click", function () {
-      const isOpen = navMenu.classList.toggle("open");
-      navToggle.classList.toggle("active");
-      navToggle.setAttribute("aria-expanded", isOpen);
+  if (toggle && links) {
+    toggle.addEventListener("click", function () {
+      const open = links.classList.toggle("open");
+      toggle.classList.toggle("active");
+      toggle.setAttribute("aria-expanded", open);
+      if (socials) socials.classList.toggle("open");
     });
-    navMenu.querySelectorAll(".nav-link").forEach(function (link) {
-      link.addEventListener("click", function () {
-        navMenu.classList.remove("open");
-        navToggle.classList.remove("active");
-        navToggle.setAttribute("aria-expanded", "false");
+
+    links.querySelectorAll("a").forEach(function (a) {
+      a.addEventListener("click", function () {
+        links.classList.remove("open");
+        toggle.classList.remove("active");
+        toggle.setAttribute("aria-expanded", "false");
+        if (socials) socials.classList.remove("open");
       });
     });
   }
 
-  document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
-    anchor.addEventListener("click", function (e) {
-      var targetId = this.getAttribute("href");
-      if (targetId === "#") return;
+  /* ── Liquid background effect ── */
+  const canvas = document.getElementById("liquid-canvas");
+  if (canvas) {
+    const size = 2048;
+    const off = document.createElement("canvas");
+    off.width = size;
+    off.height = size;
+    const ctx = off.getContext("2d");
 
-      var target = document.querySelector(targetId);
-      if (target) {
-        e.preventDefault();
-        var headerHeight = document.querySelector(".header").offsetHeight;
-        var targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+    // Nearly all-black with a subtle dark blue hint
+    const g = ctx.createLinearGradient(0, 0, size, size);
+    g.addColorStop(0, "#000000");
+    g.addColorStop(1, "#0a0a1a");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, size, size);
 
-        window.scrollTo({
-          top: targetPosition,
-          behavior: "smooth",
-        });
-      }
-    });
-  });
+    // Bake "LIAM STIER" into the texture – big, white, centred
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    var fontSize = Math.round(size * 0.18);
+    ctx.font = "800 " + fontSize + "px 'Helvetica Neue', Helvetica, Arial, sans-serif";
+    ctx.fillText("LIAM", size / 2, size / 2 - fontSize * 0.6);
+    ctx.fillText("STIER", size / 2, size / 2 + fontSize * 0.6);
 
-  var sections = document.querySelectorAll("section[id]");
-  var navLinks = document.querySelectorAll(".nav-link");
-
-  function highlightNavOnScroll() {
-    var scrollPos = window.scrollY + 100;
-
-    sections.forEach(function (section) {
-      var top = section.offsetTop;
-      var height = section.offsetHeight;
-      var id = section.getAttribute("id");
-
-      if (scrollPos >= top && scrollPos < top + height) {
-        navLinks.forEach(function (link) {
-          link.classList.remove("active");
-          if (link.getAttribute("href") === "#" + id) {
-            link.classList.add("active");
-          }
-        });
-      }
-    });
-  }
-
-  window.addEventListener("scroll", highlightNavOnScroll);
-  highlightNavOnScroll();
-
-  var contactForm = document.querySelector(".contact-form");
-
-  if (contactForm) {
-    contactForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      var name = contactForm.querySelector("#name").value.trim();
-      var email = contactForm.querySelector("#email").value.trim();
-      var message = contactForm.querySelector("#message").value.trim();
-
-      if (!name || !email || !message) {
-        alert("Please fill in all fields.");
-        return;
-      }
-      console.log("Form submitted:", { name: name, email: email, message: message });
-      alert("Thanks for your message, " + name + "! I'll get back to you soon.");
-      contactForm.reset();
-    });
+    const app = LiquidBackground(canvas);
+    app.loadImage(off.toDataURL("image/png"));
+    app.liquidPlane.material.metalness = 0.75;
+    app.liquidPlane.material.roughness = 0.25;
+    app.liquidPlane.uniforms.displacementScale.value = 5;
+    app.setRain(false);
   }
 })();

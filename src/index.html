@@ -3,118 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
-  <title>Liam Stier — Personal Website</title>
-  <meta name="title" content="Liam Stier — Personal Website">
-  <meta name="description" content="Welcome to the personal website of Liam Stier. Explore my work, projects, and get in touch.">
-  <meta name="author" content="Liam Stier">
-  <meta name="robots" content="index, follow">
-
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://liamstier.com/">
-  <meta property="og:title" content="Liam Stier — Personal Website">
-  <meta property="og:description" content="Welcome to the personal website of Liam Stier. Explore my work, projects, and get in touch.">
-
-  <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://liamstier.com/">
-  <meta property="twitter:title" content="Liam Stier — Personal Website">
-  <meta property="twitter:description" content="Welcome to the personal website of Liam Stier. Explore my work, projects, and get in touch.">
-
-  <link rel="canonical" href="https://liamstier.com/">
-
+  <title>Liam Stier</title>
   <link rel="stylesheet" href="css/styles.css">
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    "name": "Liam Stier",
-    "url": "https://liamstier.com",
-    "sameAs": []
-  }
-  </script>
 </head>
-
-
-
-
 <body>
-  <section class="nav">
-  <nav class="navbar" aria-label="Main navigation">
-    <div class="container">
-      <a href="/" class="nav-logo">Liam Stier</a>
+
+  <header class="header">
+    <nav class="nav">
+      <a href="index.html" class="nav-name">Liam Stier</a>
+
       <ul class="nav-links">
-        <li><a href="/">Home</a></li>
+        <li><a href="index.html">Home</a></li>
         <li><a href="about.html">About</a></li>
-        <li><a href="#projects">Projects</a></li>
+        <li><a href="posts.html">Posts</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
-    </div>
-  </nav>
-</section>
-  <main id="main">
-    <section class="hero" aria-label="Introduction">
-      <div class="container">
-        <h1 class="hero-title">Hi, my name is Liam Stier, welcome to my website.</h1>
-        <p class="hero-subtitle">Welcome to my personal website.</p>
-        <a href="#about" class="btn btn-primary">Learn More</a>
-      </div>
-    </section>
-    <section id="about" class="section about">
-      <div class="container">
-        <h2 class="section-title">About Me</h2>
-        <p class="about-text">
-          Hello! I'm Liam Stier. This is where you can share a bit about yourself,
-          your background, interests, and what drives you.
-        </p>
-      </div>
-    </section>
-    <section id="projects" class="section projects">
-      <div class="container">
-        <h2 class="section-title">Projects</h2>
-        <div class="projects-grid">
-          <article class="project-card">
-            <h3 class="project-title">Project One</h3>
-            <p class="project-description">A brief description of your first project and what technologies were used.</p>
-            <a href="#" class="project-link">View Project &rarr;</a>
-          </article>
-          <article class="project-card">
-            <h3 class="project-title">Project Two</h3>
-            <p class="project-description">A brief description of your second project and what technologies were used.</p>
-            <a href="#" class="project-link">View Project &rarr;</a>
-          </article>
-          <article class="project-card">
-            <h3 class="project-title">Project Three</h3>
-            <p class="project-description">A brief description of your third project and what technologies were used.</p>
-            <a href="#" class="project-link">View Project &rarr;</a>
-          </article>
-        </div>
-      </div>
-    </section>
-    <section id="contact" class="section contact">
-      <div class="container">
-        <h2 class="section-title">Get in Touch</h2>
-        <p class="contact-text">Have a question or want to work together? Reach out!</p>
-        <form class="contact-form" action="#" method="POST" aria-label="Contact form">
-          <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" required autocomplete="name" placeholder="Your name">
-          </div>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required autocomplete="email" placeholder="you@example.com">
-          </div>
-          <div class="form-group">
-            <label for="message">Message</label>
-            <textarea id="message" name="message" rows="5" required placeholder="Your message..."></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary">Send Message</button>
-        </form>
-      </div>
-    </section>
 
-  </main>
-  <script src="js/main.js"></script>
+      <div class="nav-socials">
+        <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <circle cx="12" cy="12" r="5"/>
+            <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/>
+          </svg>
+        </a>
+        <a href="#" target="_blank" rel="noopener noreferrer" aria-label="X">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </a>
+      </div>
+
+      <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span>
+        <span></span>
+      </button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <canvas id="liquid-canvas"></canvas>
+  </section>
+
+  <div class="content"></div>
+
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
