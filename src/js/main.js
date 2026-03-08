@@ -26,6 +26,21 @@ import LiquidBackground from "https://cdn.jsdelivr.net/npm/threejs-components@0.
     });
   }
 
+  /* ── Scroll-based header styling ── */
+  const header = document.querySelector(".header");
+  if (header) {
+    let lastY = 0;
+    window.addEventListener("scroll", function () {
+      const y = window.scrollY;
+      if (y > 60) {
+        header.classList.add("scrolled");
+      } else {
+        header.classList.remove("scrolled");
+      }
+      lastY = y;
+    }, { passive: true });
+  }
+
   /* ── Liquid background effect ── */
   const canvas = document.getElementById("liquid-canvas");
   if (canvas) {
@@ -53,9 +68,9 @@ import LiquidBackground from "https://cdn.jsdelivr.net/npm/threejs-components@0.
 
     const app = LiquidBackground(canvas);
     app.loadImage(off.toDataURL("image/png"));
-    app.liquidPlane.material.metalness = 0.75;
-    app.liquidPlane.material.roughness = 0.25;
-    app.liquidPlane.uniforms.displacementScale.value = 5;
+    app.liquidPlane.material.metalness = 0.85;
+    app.liquidPlane.material.roughness = 0.18;
+    app.liquidPlane.uniforms.displacementScale.value = 2.0;
     app.setRain(false);
   }
 })();
