@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <rect width="120" height="120" rx="12" fill="#1a1a2e"/>
+  <!-- storefront -->
+  <rect x="25" y="45" width="70" height="45" rx="3" fill="none" stroke="#f5a623" stroke-width="2"/>
+  <!-- roof -->
+  <polygon points="20,45 60,22 100,45" fill="none" stroke="#f5a623" stroke-width="2"/>
+  <!-- door -->
+  <rect x="50" y="65" width="20" height="25" rx="2" fill="none" stroke="#f5a623" stroke-width="1.5"/>
+  <!-- windows -->
+  <rect x="30" y="55" width="14" height="14" rx="2" fill="rgba(245,166,35,0.15)" stroke="#f5a623" stroke-width="1"/>
+  <rect x="76" y="55" width="14" height="14" rx="2" fill="rgba(245,166,35,0.15)" stroke="#f5a623" stroke-width="1"/>
+  <!-- sign -->
+  <text x="60" y="105" text-anchor="middle" fill="#f5a623" font-size="9" font-family="sans-serif" font-weight="600">SHOP</text>
+</svg>

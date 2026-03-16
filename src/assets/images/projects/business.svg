@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <rect width="120" height="120" rx="12" fill="#1a1a2e"/>
+  <!-- briefcase -->
+  <rect x="30" y="45" width="60" height="40" rx="4" fill="none" stroke="#0fffc1" stroke-width="2"/>
+  <!-- handle -->
+  <path d="M45 45 V38 a6 6 0 0 1 6-6 h18 a6 6 0 0 1 6 6 V45" fill="none" stroke="#0fffc1" stroke-width="2"/>
+  <!-- clasp -->
+  <rect x="55" y="58" width="10" height="12" rx="2" fill="rgba(15,255,193,0.2)" stroke="#0fffc1" stroke-width="1.5"/>
+  <!-- label -->
+  <text x="60" y="108" text-anchor="middle" fill="#0fffc1" font-size="8" font-family="sans-serif" font-weight="600">BUSINESS</text>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <rect width="120" height="120" rx="12" fill="#1a1a2e"/>
+  <!-- 3D printer frame -->
+  <rect x="25" y="30" width="70" height="60" rx="4" fill="none" stroke="#7b68ee" stroke-width="2"/>
+  <!-- build plate -->
+  <line x1="30" y1="80" x2="90" y2="80" stroke="#7b68ee" stroke-width="1.5"/>
+  <!-- extruder -->
+  <rect x="50" y="35" width="16" height="12" rx="2" fill="#7b68ee" opacity="0.6"/>
+  <line x1="58" y1="47" x2="58" y2="60" stroke="#7b68ee" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <!-- printed object -->
+  <rect x="45" y="65" width="26" height="15" rx="2" fill="rgba(123,104,238,0.25)" stroke="#7b68ee" stroke-width="1"/>
+  <!-- label -->
+  <text x="60" y="108" text-anchor="middle" fill="#7b68ee" font-size="8" font-family="sans-serif" font-weight="600">3D PRINT</text>
+</svg>

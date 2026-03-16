@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <rect width="120" height="120" rx="12" fill="#1a1a2e"/>
+  <!-- globe -->
+  <circle cx="60" cy="56" r="32" fill="none" stroke="#4fc3f7" stroke-width="2"/>
+  <!-- latitude lines -->
+  <ellipse cx="60" cy="56" rx="32" ry="12" fill="none" stroke="#4fc3f7" stroke-width="1" opacity="0.5"/>
+  <ellipse cx="60" cy="56" rx="32" ry="24" fill="none" stroke="#4fc3f7" stroke-width="1" opacity="0.4"/>
+  <!-- longitude line -->
+  <ellipse cx="60" cy="56" rx="14" ry="32" fill="none" stroke="#4fc3f7" stroke-width="1" opacity="0.5"/>
+  <!-- meridian -->
+  <line x1="28" y1="56" x2="92" y2="56" stroke="#4fc3f7" stroke-width="1" opacity="0.3"/>
+  <line x1="60" y1="24" x2="60" y2="88" stroke="#4fc3f7" stroke-width="1" opacity="0.3"/>
+  <!-- pin markers -->
+  <circle cx="48" cy="44" r="3" fill="#4caf50"/>
+  <circle cx="72" cy="52" r="3" fill="#e63946"/>
+  <circle cx="55" cy="66" r="3" fill="#4caf50"/>
+  <circle cx="68" cy="40" r="3" fill="#e63946"/>
+  <!-- label -->
+  <text x="60" y="108" text-anchor="middle" fill="#4fc3f7" font-size="8" font-family="sans-serif" font-weight="600">PATHWISE</text>
+</svg>

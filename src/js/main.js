@@ -68,9 +68,9 @@ import LiquidBackground from "https://cdn.jsdelivr.net/npm/threejs-components@0.
 
     const app = LiquidBackground(canvas);
     app.loadImage(off.toDataURL("image/png"));
-    app.liquidPlane.material.metalness = 0.85;
-    app.liquidPlane.material.roughness = 0.18;
-    app.liquidPlane.uniforms.displacementScale.value = 2.0;
+    app.liquidPlane.material.metalness = 0.55;
+    app.liquidPlane.material.roughness = 0.45;
+    app.liquidPlane.uniforms.displacementScale.value = 0.8;
     app.setRain(false);
   }
 })();
