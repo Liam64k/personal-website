@@ -1,19 +1,355 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+/* Sky Isle — Liam Stier
+   Ink on cloud: dark type sitting on soft white haze above a live 3D sky. */
+
+:root {
+  --ink: #0e2137;
+  --ink-soft: rgba(14, 33, 55, 0.76);
+  --cloud: #ffffff;
+  --sky: #1c5cc0;
+  --signal: #e2401b;
+  --display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --text: "Hanken Grotesk", "Segoe UI", system-ui, sans-serif;
+  --gutter: clamp(1.25rem, 6vw, 6.5rem);
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
 }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  line-height: 1.5;
-  color: #111;
-  background: #fff;
+  color: var(--ink);
+  font-family: var(--text);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  /* shows before the canvas paints, and when WebGL is unavailable */
+  background: linear-gradient(#1c5cc0, #a6ccef 62%, #dce9f6) fixed;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-main {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 4rem 1rem;
+h1, h2, h3, p, ul, figure { margin: 0; }
+ul { padding: 0; list-style: none; }
+img { display: block; max-width: 100%; height: auto; }
+button { font: inherit; color: inherit; }
+
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 6px; }
+
+.skip {
+  position: fixed; left: 1rem; top: -4rem; z-index: 50;
+  padding: 0.6rem 1rem; border-radius: 999px;
+  background: var(--ink); color: var(--cloud); text-decoration: none;
+}
+.skip:focus { top: 1rem; }
+
+/* ── World ─────────────────────────────────────────────────────────────── */
+#world {
+  position: fixed; inset: 0; z-index: 0;
+  width: 100%; height: 100%; display: block;
+}
+.no-webgl #world { display: none; }
+
+.whiteout {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background: #fff; opacity: 0;
+}
+
+/* ── Loader ────────────────────────────────────────────────────────────── */
+.loader {
+  position: fixed; inset: 0; z-index: 40;
+  display: grid; place-content: center; justify-items: center; gap: 0.9rem;
+  background: linear-gradient(#1c5cc0, #a6ccef 70%, #dce9f6);
+  color: var(--cloud);
+  transition: opacity 0.9s var(--ease), visibility 0.9s;
+}
+.loader.is-done { opacity: 0; visibility: hidden; }
+.loader__name { font-family: var(--display); font-weight: 600; font-size: clamp(2.2rem, 6vw, 3.6rem); letter-spacing: -0.02em; }
+.loader__step { font-size: 0.95rem; opacity: 0.9; }
+.loader__bar { width: min(14rem, 60vw); height: 3px; border-radius: 3px; background: rgba(255, 255, 255, 0.3); overflow: hidden; }
+.loader__bar span { display: block; height: 100%; width: 100%; background: var(--cloud); transform: scaleX(0.05); transform-origin: left; transition: transform 0.4s var(--ease); }
+
+/* ── Top bar and rail ──────────────────────────────────────────────────── */
+.topbar { position: fixed; inset: 0 0 auto 0; z-index: 20; pointer-events: none; }
+.topbar__mark {
+  position: absolute; left: var(--gutter); top: 1.4rem; pointer-events: auto;
+  font-family: var(--display); font-weight: 600; font-size: 1.15rem; letter-spacing: -0.01em;
+  color: var(--cloud); text-decoration: none;
+  text-shadow: 0 1px 12px rgba(10, 30, 60, 0.45);
+  opacity: 0; transition: opacity 0.5s;
+}
+.past-hero .topbar__mark { opacity: 1; }
+
+.rail {
+  position: fixed; right: clamp(0.75rem, 2.2vw, 2rem); top: 50%; transform: translateY(-50%);
+  display: grid; gap: 0.35rem; pointer-events: auto;
+}
+.rail a {
+  display: flex; align-items: center; justify-content: flex-end; gap: 0.6rem;
+  min-height: 1.75rem; padding: 0.15rem 0.1rem;
+  color: var(--cloud); text-decoration: none; font-size: 0.82rem; font-weight: 500;
+  text-shadow: 0 1px 10px rgba(10, 30, 60, 0.55);
+}
+.rail a span { opacity: 0; transform: translateX(6px); transition: opacity 0.3s, transform 0.3s var(--ease); }
+.rail a::after {
+  content: ""; width: 9px; height: 9px; border-radius: 50%;
+  border: 1.5px solid var(--cloud); box-shadow: 0 0 10px rgba(10, 30, 60, 0.35);
+  transition: background 0.3s, transform 0.3s var(--ease);
+}
+.rail a:hover span, .rail a:focus-visible span, .rail a.is-current span { opacity: 1; transform: none; }
+.rail a.is-current::after { background: var(--cloud); transform: scale(1.35); }
+
+/* ── Chapters ──────────────────────────────────────────────────────────── */
+main { position: relative; z-index: 5; }
+
+.chapter { height: 240vh; height: 240svh; }
+.chapter--hero { height: 190vh; height: 190svh; }
+.chapter--landing { height: 100vh; height: 100svh; }
+
+.stage {
+  position: sticky; top: 0;
+  height: 100vh; height: 100svh;
+  display: grid; align-items: center;
+  padding: 5rem var(--gutter) 3rem;
+  pointer-events: none;
+}
+.chapter[data-side="right"] .stage { justify-items: end; }
+
+.panel {
+  position: relative; width: min(31rem, 100%);
+  display: grid; gap: 1.05rem;
+}
+.panel--wide { width: min(35rem, 100%); }
+.chapter.is-active .panel, .chapter.is-active .print { pointer-events: auto; }
+
+/* the cloud the text sits on */
+.panel::before {
+  content: ""; position: absolute; z-index: -1; inset: -2.2rem -2.6rem;
+  background: rgba(255, 255, 255, 0.93);
+  border-radius: 64px 96px 72px 104px / 84px 64px 96px 72px;
+  filter: blur(15px);
+  opacity: 0; transform: scale(0.94);
+  transition: opacity 0.7s var(--ease), transform 0.9s var(--ease);
+}
+.chapter.is-active .panel::before { opacity: 1; transform: none; }
+
+h1, h2 {
+  font-family: var(--display); font-weight: 600;
+  font-variation-settings: "SOFT" 60;
+  letter-spacing: -0.025em; line-height: 0.96;
+  text-wrap: balance;
+}
+h1 { font-size: clamp(3.6rem, 10.5vw, 8.6rem); }
+h2 { font-size: clamp(2.2rem, 4.3vw, 3.5rem); }
+h3 { font-family: var(--display); font-weight: 600; font-size: 1.4rem; letter-spacing: -0.01em; line-height: 1.15; }
+p { max-width: 34rem; color: var(--ink-soft); }
+
+/* hero text sits straight on the sky, so it is white */
+.chapter--hero .panel { color: var(--cloud); width: min(44rem, 100%); align-self: end; padding-bottom: 6vh; }
+.chapter--hero .panel::before { display: none; }
+.chapter--hero h1 { filter: drop-shadow(0 4px 26px rgba(8, 32, 78, 0.5)); }
+.chapter--hero .lede {
+  color: var(--cloud); font-size: clamp(1.15rem, 1.7vw, 1.45rem); line-height: 1.4; max-width: 27rem;
+  text-shadow: 0 1px 18px rgba(8, 32, 78, 0.6);
+}
+.cue {
+  display: flex; align-items: center; gap: 0.8rem; margin-top: 0.6rem;
+  color: var(--cloud); font-size: 0.95rem; font-weight: 500;
+  text-shadow: 0 1px 14px rgba(8, 32, 78, 0.6);
+}
+.cue__line { width: 1.5px; height: 2.6rem; background: var(--cloud); transform-origin: top; animation: drop 2.2s var(--ease) infinite; }
+@keyframes drop {
+  0% { transform: scaleY(0); }
+  55% { transform: scaleY(1); }
+  100% { transform: scaleY(1) translateY(2.6rem); opacity: 0; }
+}
+
+/* ── Reveals ───────────────────────────────────────────────────────────── */
+.reveal {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.chapter.is-active .reveal {
+  opacity: 1; transform: none;
+  transition: opacity 0.8s var(--ease) var(--d, 0s), transform 0.9s var(--ease) var(--d, 0s);
+}
+.split .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.12em; margin-bottom: -0.12em; }
+.split .wi {
+  display: inline-block; transform: translateY(108%);
+  transition: transform 0.3s ease;
+}
+.chapter.is-active .split .wi {
+  transform: none;
+  transition: transform 0.95s var(--ease) calc(var(--i) * 0.07s);
+}
+
+/* ── Prints (the two photos) ───────────────────────────────────────────── */
+.print {
+  background: #fdfcf8; padding: 0.6rem 0.6rem 0;
+  box-shadow: 0 22px 60px rgba(8, 28, 60, 0.38), 0 2px 6px rgba(8, 28, 60, 0.25);
+  border-radius: 3px;
+}
+.print img { width: 100%; object-fit: cover; border-radius: 1px; }
+.print figcaption {
+  padding: 0.55rem 0.2rem 0.7rem; font-family: var(--display); font-style: italic;
+  font-size: 0.95rem; color: var(--ink);
+}
+.print--hero {
+  position: absolute; right: calc(var(--gutter) + 3.5rem); bottom: 11vh;
+  width: clamp(11rem, 19vw, 17rem);
+  rotate: 4deg;
+}
+.print--hero img { aspect-ratio: 4 / 5; object-position: 50% 68%; }
+.chapter.is-active .print--hero { animation: float 7s ease-in-out 1.6s infinite; }
+@keyframes float {
+  50% { translate: 0 -10px; rotate: 3deg; }
+}
+
+/* ── Summit facts ──────────────────────────────────────────────────────── */
+.facts { display: grid; grid-template-columns: 1fr 1fr; border-top: 1.5px solid rgba(14, 33, 55, 0.2); }
+.facts li { padding: 0.85rem 0.25rem 0.8rem 0; border-bottom: 1.5px solid rgba(14, 33, 55, 0.2); display: grid; }
+.facts li:nth-child(odd) { border-right: 1.5px solid rgba(14, 33, 55, 0.2); }
+.facts li:nth-child(even) { padding-left: 1rem; }
+.facts strong { font-family: var(--display); font-weight: 600; font-size: 1.75rem; line-height: 1.1; letter-spacing: -0.02em; }
+.facts span { font-size: 0.95rem; color: var(--ink-soft); }
+.facts__photo {
+  position: relative; display: grid; text-align: left; width: 100%;
+  padding: 0 4.2rem 0 0; border: 0; background: none; cursor: pointer;
+}
+.facts__photo img {
+  position: absolute; right: 0.1rem; top: 50%; width: 3.6rem; height: 3.6rem; object-fit: cover; object-position: 78% 40%;
+  border: 3px solid #fdfcf8; border-radius: 2px; rotate: 6deg; translate: 0 -50%;
+  box-shadow: 0 6px 16px rgba(8, 28, 60, 0.35);
+  transition: rotate 0.4s var(--ease), scale 0.4s var(--ease);
+}
+.facts__photo:hover img, .facts__photo:focus-visible img { rotate: -3deg; scale: 1.18; }
+.facts__photo span { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ── Workshop ──────────────────────────────────────────────────────────── */
+.venture { display: grid; gap: 0.4rem; padding-top: 0.9rem; border-top: 1.5px solid rgba(14, 33, 55, 0.2); }
+.venture em {
+  display: inline-block; margin-left: 0.4rem; padding: 0.12rem 0.55rem; vertical-align: middle;
+  font-family: var(--text); font-style: normal; font-weight: 600; font-size: 0.74rem; letter-spacing: 0;
+  color: var(--cloud); background: var(--signal); border-radius: 999px;
+}
+.link {
+  justify-self: start; color: var(--ink); font-weight: 600;
+  text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px;
+  text-decoration-color: var(--signal);
+  transition: text-underline-offset 0.25s var(--ease);
+}
+.link:hover { text-underline-offset: 7px; }
+
+/* ── Lab ───────────────────────────────────────────────────────────────── */
+.projects { border-top: 1.5px solid rgba(14, 33, 55, 0.2); }
+.projects a {
+  display: grid; grid-template-columns: 10.5rem 1fr; gap: 0.2rem 1rem; align-items: baseline;
+  padding: 0.5rem 0.4rem 0.52rem 0;
+  border-bottom: 1.5px solid rgba(14, 33, 55, 0.2);
+  color: inherit; text-decoration: none;
+  transition: padding 0.3s var(--ease), background 0.3s;
+}
+.projects strong { font-family: var(--display); font-weight: 600; font-size: 1.18rem; letter-spacing: -0.01em; }
+.projects span { font-size: 0.93rem; line-height: 1.4; color: var(--ink-soft); }
+.projects a:hover, .projects a:focus-visible, .projects a.is-lit {
+  padding-left: 0.7rem; background: linear-gradient(90deg, rgba(14, 33, 55, 0.09), rgba(14, 33, 55, 0));
+}
+.projects a:hover strong, .projects a.is-lit strong { color: var(--signal); }
+
+/* ── Towers ────────────────────────────────────────────────────────────── */
+.signals { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
+.signals a {
+  display: grid; grid-template-columns: 1.5rem 1fr; column-gap: 0.7rem; align-items: center;
+  padding: 0.65rem 0.8rem; border-radius: 14px;
+  border: 1.5px solid rgba(14, 33, 55, 0.22);
+  color: inherit; text-decoration: none;
+  transition: background 0.3s, border-color 0.3s, translate 0.3s var(--ease);
+}
+.signals svg { width: 1.5rem; height: 1.5rem; grid-row: span 2; }
+.signals strong { font-weight: 600; line-height: 1.2; }
+.signals span { font-size: 0.86rem; color: var(--ink-soft); overflow-wrap: anywhere; line-height: 1.25; }
+.signals a:hover, .signals a:focus-visible, .signals a.is-lit {
+  background: var(--ink); border-color: var(--ink); color: var(--cloud); translate: 0 -2px;
+}
+.signals a:hover span, .signals a:focus-visible span, .signals a.is-lit span { color: rgba(255, 255, 255, 0.8); }
+
+.beacons { position: fixed; inset: 0; z-index: 6; pointer-events: none; overflow: hidden; }
+.beacon {
+  position: absolute; left: 0; top: 0; pointer-events: auto;
+  display: flex; align-items: center; gap: 0.45rem;
+  padding: 0.38rem 0.75rem 0.38rem 0.55rem; border-radius: 999px;
+  background: rgba(10, 22, 44, 0.78); color: var(--cloud);
+  font-size: 0.86rem; font-weight: 600; text-decoration: none; white-space: nowrap;
+  box-shadow: 0 0 0 1.5px var(--c), 0 0 26px -4px var(--c);
+  will-change: transform, opacity;
+}
+.beacon::before { content: ""; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); }
+.beacon.is-lit { background: var(--cloud); color: var(--ink); }
+
+/* ── Landing ───────────────────────────────────────────────────────────── */
+.contact { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.button {
+  display: inline-flex; align-items: center; min-height: 3rem; padding: 0.7rem 1.3rem;
+  border-radius: 999px; border: 1.5px solid var(--ink);
+  background: var(--ink); color: var(--cloud);
+  font-weight: 600; text-decoration: none; cursor: pointer;
+  transition: background 0.25s, color 0.25s, translate 0.25s var(--ease);
+}
+.button:hover { background: var(--signal); border-color: var(--signal); translate: 0 -2px; }
+.button--quiet { background: transparent; color: var(--ink); }
+.button--quiet:hover { background: var(--ink); border-color: var(--ink); color: var(--cloud); }
+.colophon { display: grid; gap: 0.2rem; margin-top: 0.4rem; font-size: 0.86rem; }
+
+/* ── Photo dialog ──────────────────────────────────────────────────────── */
+.photo {
+  border: 0; padding: 0; background: none; max-width: min(46rem, 92vw);
+  overflow: visible;
+}
+.photo::backdrop { background: rgba(8, 20, 44, 0.66); backdrop-filter: blur(6px); }
+.photo[open] { display: grid; justify-items: center; gap: 1.2rem; animation: develop 0.6s var(--ease); }
+.photo .button--quiet { color: var(--cloud); border-color: var(--cloud); }
+.photo .button--quiet:hover { background: var(--cloud); color: var(--ink); }
+.print--large { rotate: -1.5deg; padding: 0.8rem 0.8rem 0; }
+.print--large img { max-height: 68vh; width: auto; }
+@keyframes develop {
+  from { opacity: 0; scale: 0.92; rotate: 3deg; }
+}
+
+/* ── No WebGL: a still sky and the whole page readable ─────────────────── */
+.no-webgl .chapter { height: auto; min-height: 100vh; }
+.no-webgl .stage { position: relative; height: auto; min-height: 100vh; }
+.no-webgl .beacons, .no-webgl .whiteout { display: none; }
+
+/* ── Phones ────────────────────────────────────────────────────────────── */
+@media (max-width: 760px) {
+  body { font-size: 1rem; }
+  .stage { align-items: end; padding: 4.5rem 1rem 1.6rem; }
+  .chapter[data-side="right"] .stage { justify-items: start; }
+  .panel, .panel--wide { width: 100%; gap: 0.8rem; }
+  .panel::before { inset: -1.4rem -1.2rem -2.6rem; filter: blur(12px); border-radius: 34px; }
+  .chapter--hero .panel { padding-bottom: 2vh; }
+  .print--hero { right: 1.1rem; top: 5.2rem; bottom: auto; width: 8.4rem; }
+  .print--hero figcaption { display: none; }
+  .print--hero { padding-bottom: 0.6rem; }
+  .rail { right: 0.45rem; gap: 0.1rem; }
+  .rail a span { display: none; }
+  .rail a { min-width: 1.75rem; justify-content: center; }
+  .projects a { grid-template-columns: 1fr; padding: 0.42rem 0.3rem 0.45rem 0; }
+  .projects span { font-size: 0.86rem; }
+  .projects strong { font-size: 1.05rem; }
+  .signals { grid-template-columns: 1fr; }
+  .facts strong { font-size: 1.45rem; }
+  .beacon span { display: none; }
+  .beacon { padding: 0.4rem; }
+}
+
+/* ── Reduced motion ────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal, .split .wi, .panel::before,
+  .chapter.is-active .reveal, .chapter.is-active .split .wi {
+    transition: opacity 0.2s linear; transform: none;
+  }
+  .cue__line, .chapter.is-active .print--hero, .photo[open] { animation: none; }
+  .cue__line { transform: none; }
 }

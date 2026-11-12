@@ -3,15 +3,180 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Liam Stier</title>
+  <title>Liam Stier — AI engineer and founder</title>
+  <meta name="description" content="Liam Stier is a 17-year-old AI engineer and founder. Fly over a floating island to see his businesses, projects and how to reach him.">
+  <meta name="theme-color" content="#1c5cc0">
+  <link rel="canonical" href="https://liamstier.com/">
+  <meta property="og:title" content="Liam Stier — AI engineer and founder">
+  <meta property="og:description" content="A scroll-driven flight over a floating island: businesses, projects and contact.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://liamstier.com/">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231c5cc0'/%3E%3Cpath d='M6 15h20l-4 6-3 6-3-5-4 3-3-5z' fill='%236b5a48'/%3E%3Cpath d='M6 15q10-5 20 0z' fill='%2389b45a'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..700,0..100&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
 </head>
 <body>
+  <a class="skip" href="#summit">Skip the intro</a>
+
+  <canvas id="world" aria-hidden="true"></canvas>
+  <div class="whiteout" aria-hidden="true"></div>
+
+  <div class="loader" id="loader" role="status" aria-live="polite">
+    <p class="loader__name">Liam Stier</p>
+    <p class="loader__step" id="loader-step">Mixing the sky</p>
+    <div class="loader__bar"><span id="loader-bar"></span></div>
+  </div>
+
+  <header class="topbar">
+    <a class="topbar__mark" href="#hero">Liam Stier</a>
+    <nav class="rail" aria-label="Stops on the island">
+      <a href="#hero" data-stop="0"><span>Sky</span></a>
+      <a href="#summit" data-stop="1"><span>Summit</span></a>
+      <a href="#workshop" data-stop="2"><span>Workshop</span></a>
+      <a href="#lab" data-stop="3"><span>Lab</span></a>
+      <a href="#towers" data-stop="4"><span>Towers</span></a>
+      <a href="#landing" data-stop="5"><span>Landing</span></a>
+    </nav>
+  </header>
+
   <main>
-    <h1>Liam Stier</h1>
-    <p>New site coming soon.</p>
+    <!-- Sky -->
+    <section class="chapter chapter--hero" id="hero" data-side="left">
+      <div class="stage">
+        <div class="panel">
+          <h1 class="split">Liam Stier</h1>
+          <p class="lede reveal" style="--d:.35s">AI engineer and founder. I'm 17, and I build software, games and companies.</p>
+          <p class="cue reveal" style="--d:.6s"><span class="cue__line" aria-hidden="true"></span>Scroll to fly down to the island</p>
+        </div>
+        <figure class="print print--hero reveal" style="--d:.5s">
+          <img src="assets/images/liam-desk.jpg" width="1500" height="2000" alt="Liam Stier working on a laptop beside a window overlooking a city" fetchpriority="high">
+          <figcaption>At work on the next build</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Summit -->
+    <section class="chapter" id="summit" data-side="left">
+      <div class="stage">
+        <div class="panel">
+          <h2 class="split">Seventeen, and hard to wear out.</h2>
+          <p class="reveal" style="--d:.3s">I like things that take a long time to get good at. Away from the keyboard, that means long runs, climbing and Muay Thai.</p>
+          <ul class="facts reveal" style="--d:.45s">
+            <li><strong>17</strong><span>years old</span></li>
+            <li><strong>50 km</strong><span>run, start to finish</span></li>
+            <li><strong>Rock</strong><span>climbing</span></li>
+            <li>
+              <button class="facts__photo" type="button" id="open-photo" aria-haspopup="dialog">
+                <img src="assets/images/liam-muay-thai.jpg" width="1080" height="810" alt="" loading="lazy">
+                <strong>Muay Thai</strong><span>see me training</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Workshop -->
+    <section class="chapter" id="workshop" data-side="right">
+      <div class="stage">
+        <div class="panel">
+          <h2 class="split">Two businesses, one workshop.</h2>
+          <div class="venture reveal" style="--d:.3s">
+            <h3>Heating Media</h3>
+            <p>The marketing agency I founded for heating and cooling companies. We run their Google and Meta ads and automate the follow-up, so the schedule fills with jobs that close.</p>
+            <a class="link" href="https://heatingmedia.com" target="_blank" rel="noopener">Visit heatingmedia.com</a>
+          </div>
+          <div class="venture reveal" style="--d:.45s">
+            <h3>Online personal training <em>Coming soon</em></h3>
+            <p>Coaching you can follow from anywhere, built on what distance running, climbing and fight training have taught me about getting stronger.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lab -->
+    <section class="chapter" id="lab" data-side="left">
+      <div class="stage">
+        <div class="panel panel--wide">
+          <h2 class="split">Seven things I've built.</h2>
+          <ul class="projects reveal" style="--d:.3s" id="projects">
+            <li><a href="https://github.com/Liam64k/Nexus" target="_blank" rel="noopener" data-screen="Nexus" data-kind="Platform" data-hue="212">
+              <strong>Nexus</strong><span>My largest private build: one hub that ties my tools and data together.</span></a></li>
+            <li><a href="https://github.com/Liam64k/liam-stier" target="_blank" rel="noopener" data-screen="AI Dashboard" data-kind="AI tool" data-hue="268">
+              <strong>AI Dashboard</strong><span>A personal dashboard that puts AI to work on my own day.</span></a></li>
+            <li><a href="https://liam64k.github.io/convoy/" target="_blank" rel="noopener" data-screen="Convoy" data-kind="Game" data-hue="24">
+              <strong>Convoy</strong><span>First-person survival on a pack of crashing, physics-driven trucks.</span></a></li>
+            <li><a href="https://liam64k.github.io/knuckleheads/" target="_blank" rel="noopener" data-screen="Knuckle heads" data-kind="Game" data-hue="340">
+              <strong>Knuckleheads</strong><span>A wobbly multiplayer brawler where each mouse button is a fist.</span></a></li>
+            <li><a href="https://github.com/Liam64k/heatingmedia-website" target="_blank" rel="noopener" data-screen="Heating Media" data-kind="Website" data-hue="38">
+              <strong>Heating Media website</strong><span>The site I designed and built for my agency.</span></a></li>
+            <li><a href="https://github.com/Liam64k/gym-pr-app" target="_blank" rel="noopener" data-screen="Nexus Gym PR" data-kind="App" data-hue="150">
+              <strong>Nexus Gym PR</strong><span>Logs every lift and tracks personal records over time.</span></a></li>
+            <li><a href="https://github.com/Liam64k/colourblind_application" target="_blank" rel="noopener" data-screen="Colour blind" data-kind="Accessibility" data-hue="185">
+              <strong>Colourblind app</strong><span>A C# tool that helps colour-blind people tell colours apart.</span></a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Towers -->
+    <section class="chapter" id="towers" data-side="right">
+      <div class="stage">
+        <div class="panel">
+          <h2 class="split">Four lights, four ways to find me.</h2>
+          <p class="reveal" style="--d:.3s">Every tower is a link. Pick a light.</p>
+          <ul class="signals reveal" style="--d:.45s" id="signals">
+            <li><a href="https://www.instagram.com/stierliam/" target="_blank" rel="noopener" data-color="#ff4f8b">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><circle cx="12" cy="12" r="4.6"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>
+              <strong>Instagram</strong><span>@stierliam</span></a></li>
+            <li><a href="https://x.com/LiamStier64k" target="_blank" rel="noopener" data-color="#8fd4ff">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              <strong>X</strong><span>@LiamStier64k</span></a></li>
+            <li><a href="https://github.com/Liam64k" target="_blank" rel="noopener" data-color="#a58bff">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+              <strong>GitHub</strong><span>Liam64k</span></a></li>
+            <li><a href="mailto:liam.stier@gmail.com" data-color="#ffc145">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg>
+              <strong>Email</strong><span>liam.stier@gmail.com</span></a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Landing -->
+    <section class="chapter chapter--landing" id="landing" data-side="left">
+      <div class="stage">
+        <div class="panel">
+          <h2 class="split">Land a message.</h2>
+          <p class="reveal" style="--d:.3s">Email is the fastest way to reach me. Tell me what you're building.</p>
+          <div class="contact reveal" style="--d:.45s">
+            <a class="button" href="mailto:liam.stier@gmail.com">Email liam.stier@gmail.com</a>
+            <button class="button button--quiet" type="button" id="copy-email" data-email="liam.stier@gmail.com">Copy address</button>
+          </div>
+          <footer class="colophon reveal" style="--d:.6s">
+            <p>This island is drawn live in your browser from noise. No 3D models, no image textures.</p>
+            <p>© 2026 Liam Stier</p>
+          </footer>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <script src="js/main.js"></script>
+  <!-- Labels that ride on the tower tips; the list in the Towers panel is the accessible copy. -->
+  <div class="beacons" id="beacons" aria-hidden="true"></div>
+
+  <dialog class="photo" id="photo">
+    <figure class="print print--large">
+      <img src="assets/images/liam-muay-thai.jpg" width="1080" height="810" alt="Liam Stier in boxing gloves, guarding and throwing a punch during Muay Thai training">
+      <figcaption>Muay Thai, mid-round</figcaption>
+    </figure>
+    <form method="dialog"><button class="button button--quiet" autofocus>Close</button></form>
+  </dialog>
+
+  <noscript><style>.loader{display:none}.chapter .reveal,.chapter .split{opacity:1;transform:none}</style></noscript>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
