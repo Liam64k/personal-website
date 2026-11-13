@@ -6,6 +6,9 @@ import { buildSky, buildClouds } from "./world/sky.js";
 import { buildIsland } from "./world/island.js";
 import { buildLandmarks } from "./world/landmarks.js";
 import { buildWater } from "./world/water.js";
+import { planTrees, buildFlora } from "./world/flora.js";
+import { buildLife } from "./world/life.js";
+import { createPost, skyEnvironment } from "./world/post.js";
 
 const page = createPage();
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -80,21 +83,41 @@ async function boot() {
   const t0 = performance.now();
   page.setLoader(0.12, "Mixing the sky");
   await nextFrame();
-  scene.add(buildSky(env));
+  const sky = buildSky(env);
+  scene.add(sky);
+  applyLight(1.6, env, sun, hemi, scene);
+  scene.environment = skyEnvironment(renderer, sky);
+  scene.environmentIntensity = 0.5;
   const clouds = buildClouds(env, quality);
   scene.add(clouds.mesh);
 
   page.setLoader(0.38, "Raising the rock");
   await nextFrame();
-  const island = buildIsland(env, quality);
+  const plan = planTrees();
+  const island = buildIsland(env, quality, plan.shade);
   scene.add(island.group);
   scene.add(buildWater(env).group);
+  const flora = buildFlora(env, plan, quality);
+  scene.add(flora.group);
+  const life = buildLife(env, quality);
+  scene.add(life.group);
 
   page.setLoader(0.7, "Lighting the beacons");
   await Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => setTimeout(r, 1500))]);
   await nextFrame();
   const marks = buildLandmarks(env, { projects: page.projects, socials: page.socials });
   scene.add(marks.group);
+
+  let post = null;
+  const params = new URLSearchParams(location.search);
+  if (!params.has("nopost")) {
+    try {
+      const samples = params.has("msaa") ? Number(params.get("msaa")) : quality.high ? 4 : 2;
+      post = createPost(renderer, { samples, rays: quality.high });
+    } catch (err) {
+      console.warn("Finishing pass unavailable:", err);
+    }
+  }
 
   // ── sizing ───────────────────────────────────────────────────────────────
   let W = 1, H = 1, narrow = false;
@@ -103,6 +126,9 @@ async function boot() {
     narrow = W / H < 0.85;
     renderer.setPixelRatio(dpr);
     renderer.setSize(W, H, false);
+    if (post) post.setSize(W, H, dpr);
+    flora.resize(dpr);
+    life.resize(dpr);
     camera.aspect = W / H;
     page.measure();
   }
@@ -228,6 +254,8 @@ async function boot() {
     // world
     island.update(time);
     marks.update(time, dt, env.dusk);
+    life.update(env.dusk);
+    scene.environmentIntensity = 0.5 - env.dusk * 0.22;
     clouds.update(still ? 0 : time, camera, Math.min(1, bank * 1.6));
 
     // labels riding the tower tips
@@ -243,7 +271,8 @@ async function boot() {
       el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -190%)`;
     });
 
-    renderer.render(scene, camera);
+    if (post) post.render(scene, camera, env);
+    else renderer.render(scene, camera);
 
     // if frames run long, trade resolution for smoothness
     // (frames longer than 100 ms are a throttled tab, not a slow GPU)
@@ -251,8 +280,7 @@ async function boot() {
     if (++frames > 120 && slow > 29 && dpr > 1) {
       slow = 16;
       dpr = Math.max(1, dpr - 0.25);
-      renderer.setPixelRatio(dpr);
-      renderer.setSize(W, H, false);
+      resize();
       frames = 0;
     }
   }

@@ -104,10 +104,13 @@ export function buildClouds(env, quality) {
   }
 
   // cumulus heaps
-  const heaps = Math.round(18 * k);
+  const heaps = Math.round(27 * k);
   for (let h = 0; h < heaps; h++) {
     const th = (h / heaps) * Math.PI * 2 + rand() * 0.5;
-    const rad = 170 + rand() * 380;
+    let rad = 230 + rand() * 340;
+    // keep the view from the opening camera (it sits at about 82 degrees) clear
+    let off = Math.abs(((th - 1.43 + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI);
+    if (off < 0.75) rad += 220;
     const cx = Math.cos(th) * rad, cz = Math.sin(th) * rad;
     const cy = -40 + rand() * 110;
     const w = 45 + rand() * 70, tall = 22 + rand() * 40;
@@ -119,6 +122,20 @@ export function buildClouds(env, quality) {
         cx + Math.cos(a) * rr, cy + up * tall, cz + Math.sin(a) * rr * 0.8,
         (26 + rand() * 30) * (1 - up * 0.35), 0.25 + up * 0.75, 0.95
       );
+    }
+  }
+
+  // a few towering thunderheads on the horizon
+  for (let h = 0; h < Math.round(7 * k); h++) {
+    const th = (h / 7) * Math.PI * 2 + 0.6 + rand() * 0.4;
+    const rad = 520 + rand() * 260;
+    const cx = Math.cos(th) * rad, cz = Math.sin(th) * rad;
+    const w = 120 + rand() * 80, tall = 110 + rand() * 90;
+    for (let i = 0; i < 44; i++) {
+      const a = rand() * Math.PI * 2;
+      const up = Math.pow(rand(), 1.15);
+      const rr = Math.pow(rand(), 0.7) * w * (1 - up * 0.55) * (up > 0.82 ? 1.5 : 1);
+      add(cx + Math.cos(a) * rr, -60 + up * tall, cz + Math.sin(a) * rr, (62 + rand() * 46) * (1 - up * 0.25), 0.2 + up * 0.8, 0.96, 0.25);
     }
   }
 
@@ -205,7 +222,8 @@ export function buildClouds(env, quality) {
         vec4 t = texture2D(uMap, vUv);
         float a = t.a * vAlpha;
         if (a < 0.004) discard;
-        float lit = clamp(vShade * 0.6 + vUp * 0.75 + (t.r - 0.5) * 0.55 + 0.32, 0.0, 1.0);
+        float lit = clamp(vShade * 0.7 + vUp * 0.95 + (t.r - 0.5) * 0.7 + 0.22, 0.0, 1.0);
+        lit = lit * lit * (3.0 - 2.0 * lit);
         vec3 col = mix(uShade, uLit, lit);
         // thin edges glow when the sun is behind them
         col += uSunCol * pow(vSun, 6.0) * (1.0 - t.a) * 0.55;

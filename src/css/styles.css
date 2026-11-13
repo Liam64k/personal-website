@@ -212,18 +212,19 @@ p { max-width: 34rem; color: var(--ink-soft); }
 .facts li:nth-child(even) { padding-left: 1rem; }
 .facts strong { font-family: var(--display); font-weight: 600; font-size: 1.75rem; line-height: 1.1; letter-spacing: -0.02em; }
 .facts span { font-size: 0.95rem; color: var(--ink-soft); }
-.facts__photo {
-  position: relative; display: grid; text-align: left; width: 100%;
-  padding: 0 4.2rem 0 0; border: 0; background: none; cursor: pointer;
+.peek {
+  justify-self: start; display: flex; align-items: center; gap: 0.7rem;
+  margin-top: 0.3rem; padding: 0; border: 0; background: none; cursor: pointer;
+  font-weight: 600; color: var(--ink);
 }
-.facts__photo img {
-  position: absolute; right: 0.1rem; top: 50%; width: 3.6rem; height: 3.6rem; object-fit: cover; object-position: 78% 40%;
-  border: 3px solid #fdfcf8; border-radius: 2px; rotate: 6deg; translate: 0 -50%;
+.peek img {
+  width: 3.4rem; height: 3.4rem; object-fit: cover; object-position: 78% 40%;
+  border: 3px solid #fdfcf8; border-radius: 2px; rotate: -5deg;
   box-shadow: 0 6px 16px rgba(8, 28, 60, 0.35);
   transition: rotate 0.4s var(--ease), scale 0.4s var(--ease);
 }
-.facts__photo:hover img, .facts__photo:focus-visible img { rotate: -3deg; scale: 1.18; }
-.facts__photo span { text-decoration: underline; text-underline-offset: 3px; }
+.peek:hover img, .peek:focus-visible img { rotate: 3deg; scale: 1.15; }
+.peek span { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; text-decoration-color: var(--signal); }
 
 /* ── Workshop ──────────────────────────────────────────────────────────── */
 .venture { display: grid; gap: 0.4rem; padding-top: 0.9rem; border-top: 1.5px solid rgba(14, 33, 55, 0.2); }
@@ -331,11 +332,11 @@ p { max-width: 34rem; color: var(--ink-soft); }
   .print--hero { right: 1.1rem; top: 5.2rem; bottom: auto; width: 8.4rem; }
   .print--hero figcaption { display: none; }
   .print--hero { padding-bottom: 0.6rem; }
-  .rail { right: 0.45rem; gap: 0.1rem; }
-  .rail a span { display: none; }
-  .rail a { min-width: 1.75rem; justify-content: center; }
-  .projects a { grid-template-columns: 1fr; padding: 0.42rem 0.3rem 0.45rem 0; }
-  .projects span { font-size: 0.86rem; }
+  .rail { display: none; }
+  /* names only, two across, so the screens behind stay in view */
+  .projects { display: grid; grid-template-columns: 1fr 1fr; column-gap: 0.9rem; }
+  .projects a { grid-template-columns: 1fr; padding: 0.7rem 0.2rem; min-height: 2.75rem; align-items: center; }
+  .projects span { display: none; }
   .projects strong { font-size: 1.05rem; }
   .signals { grid-template-columns: 1fr; }
   .facts strong { font-size: 1.45rem; }

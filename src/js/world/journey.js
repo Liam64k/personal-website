@@ -8,7 +8,7 @@ const C = (hex) => new THREE.Color(hex);
 export const STOPS = [
   { id: "hero", pos: [26, 36, 198], target: [0, -13, 0], fov: 38, shift: 0.12, lift: 0 },
   { id: "summit", pos: [-45, 33, 15], target: [-13, 24.5, -17], fov: 40, shift: 0.14, lift: 15 },
-  { id: "workshop", pos: [46, 11.5, 13], target: [25, 6.2, -9], fov: 38, shift: -0.14, lift: 9 },
+  { id: "workshop", pos: [49, 12, 17], target: [25, 9.4, -9], fov: 40, shift: -0.15, lift: 9, narrow: [57, 21, 2] },
   { id: "lab", pos: [15, 12, 60], target: [11, 6.4, 26], fov: 42, shift: 0.25, lift: 7 },
   { id: "towers", pos: [-8, 8.6, 42], target: [-30, 16, 18], fov: 42, shift: -0.15, lift: 12 },
   { id: "landing", pos: [106, 22, 82], target: [8, 5, -2], fov: 36, shift: 0.12, lift: 0 },
@@ -103,7 +103,7 @@ export function applyLight(c, env, sun, hemi, scene) {
   const hp = lerp(a.hemiPower, b.hemiPower, t);
   hemi.color.copy(a.hemiSky).lerp(b.hemiSky, t);
   hemi.groundColor.copy(a.hemiGround).lerp(b.hemiGround, t);
-  hemi.intensity = hp;
+  hemi.intensity = hp * 0.72; // the sky reflection map supplies the rest
   env.uAmbCol.value.copy(hemi.color).multiplyScalar(hp / Math.PI);
 
   env.uZenith.value.copy(a.zenith).lerp(b.zenith, t);
@@ -137,8 +137,11 @@ export function cameraAt(c, narrow, out) {
   P.fromArray(a.pos); T.fromArray(a.target);
   P2.fromArray(b.pos); T2.fromArray(b.target);
   if (narrow) {
-    if (i > 0) P.sub(T).multiplyScalar(1.5).add(T);
-    P2.sub(T2).multiplyScalar(1.5).add(T2);
+    // phones: a stop can name its own camera position, otherwise just step back
+    if (a.narrow) P.fromArray(a.narrow);
+    else if (i > 0) P.sub(T).multiplyScalar(1.5).add(T);
+    if (b.narrow) P2.fromArray(b.narrow);
+    else P2.sub(T2).multiplyScalar(1.5).add(T2);
   }
   out.pos.copy(P).lerp(P2, t);
   out.target.copy(T).lerp(T2, t);
@@ -153,6 +156,6 @@ export function cameraAt(c, narrow, out) {
 
   out.fov = lerp(a.fov, b.fov, t) + (narrow ? 12 : 0);
   out.shift = narrow ? 0 : lerp(a.shift, b.shift, t);
-  out.rise = narrow ? 0.13 : 0;
+  out.rise = narrow ? 0.2 : 0;
   return out;
 }

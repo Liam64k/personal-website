@@ -93,6 +93,25 @@ function slopeUp(x, z) {
   return (2 * e) / Math.hypot(dx, 2 * e, dz); // y of the unit normal
 }
 
+// Smaller islands around the main one. `fixed` ones are big, far and carry trees.
+export const ISLETS = [
+  { p: [78, 14, -38], s: 9, seed: 1.7 },
+  { p: [-86, -6, 22], s: 12, seed: 5.2 },
+  { p: [-58, 30, -64], s: 6.5, seed: 9.1 },
+  { p: [52, -20, 74], s: 7.5, seed: 12.6 },
+  { p: [18, 38, -92], s: 5, seed: 15.4 },
+  { p: [96, 4, 40], s: 4, seed: 21.9 },
+  { p: [-104, 26, -20], s: 5, seed: 24.3 },
+  { p: [-72, -24, 86], s: 6, seed: 27.8 },
+  { p: [70, 44, -96], s: 8, seed: 31.1 },
+  { p: [120, -30, -12], s: 10, seed: 34.6 },
+  { p: [-30, 54, -112], s: 7, seed: 38.2 },
+  { p: [-150, 6, -95], s: 26, seed: 41.5, fixed: true, trees: 3 },
+  { p: [170, -12, -120], s: 32, seed: 45.9, fixed: true, trees: 4 },
+  { p: [-172, 30, 58], s: 18, seed: 49.4, fixed: true, trees: 2 },
+  { p: [60, 62, -195], s: 22, seed: 53.7, fixed: true, trees: 2 },
+];
+
 // ── Rock material ──────────────────────────────────────────────────────────
 const pathUniform = { value: PATH.map(([x, z]) => new THREE.Vector2(x, z)) };
 const padUniform = {
@@ -105,7 +124,7 @@ const padUniform = {
  * Standard material whose colour and bump come from world position:
  * grass and soil on flat tops, layered rock on steep faces and below.
  */
-export function makeRockMaterial({ ground = 1, topMask = 1, baseY = 0 } = {}) {
+export function makeRockMaterial({ ground = 1, topMask = 1, baseY = 0, tint = null } = {}) {
   const mat = new THREE.MeshStandardMaterial({ roughness: 0.94, metalness: 0 });
   mat.onBeforeCompile = (shader) => {
     shader.uniforms.uPath = pathUniform;
@@ -113,6 +132,7 @@ export function makeRockMaterial({ ground = 1, topMask = 1, baseY = 0 } = {}) {
     shader.uniforms.uGround = { value: ground };
     shader.uniforms.uTopMask = { value: topMask };
     shader.uniforms.uBaseY = { value: baseY };
+    shader.uniforms.uTint = { value: tint || new THREE.Color(1, 1, 1) };
 
     shader.vertexShader = shader.vertexShader
       .replace("#include <common>", "#include <common>\nvarying vec3 vWPos;\nvarying vec3 vWNorm;")
@@ -141,6 +161,7 @@ export function makeRockMaterial({ ground = 1, topMask = 1, baseY = 0 } = {}) {
         uniform float uGround;
         uniform float uTopMask;
         uniform float uBaseY;
+        uniform vec3 uTint;
         ${GLSL_NOISE}
         float iPathDist(vec2 p){
           float best = 1e9;
@@ -167,8 +188,12 @@ export function makeRockMaterial({ ground = 1, topMask = 1, baseY = 0 } = {}) {
         vec3 iwn = normalize(vWNorm);
         float in1 = iFbm(vWPos * 0.07);
         float in2 = iFbm(vWPos * 0.33 + 7.0);
-        float in3 = iNoise(vWPos * 2.6);
-        float in4 = iNoise(vWPos * 9.0);
+        // fine detail fades with distance, so far rock stays smooth instead of sparkling
+        float iDist = length(vViewPosition);
+        float iNearA = 1.0 - smoothstep(40.0, 180.0, iDist);
+        float iNearB = 1.0 - smoothstep(12.0, 64.0, iDist);
+        float in3 = mix(0.5, iNoise(vWPos * 2.6), iNearA);
+        float in4 = mix(0.5, iNoise(vWPos * 9.0), iNearB);
 
         // layered rock
         float strata = sin(vWPos.y * 0.62 + in1 * 7.0) * 0.5 + 0.5;
@@ -200,16 +225,16 @@ export function makeRockMaterial({ ground = 1, topMask = 1, baseY = 0 } = {}) {
 
         float topBand = mix(1.0, smoothstep(-2.6, -0.4, vWPos.y), uTopMask);
         float iGround = flatness * topBand * uGround;
-        diffuseColor.rgb = mix(rock, groundCol, iGround);`
+        diffuseColor.rgb = mix(rock, groundCol, iGround) * uTint;`
       )
       .replace(
         "#include <normal_fragment_maps>",
         /* glsl */ `#include <normal_fragment_maps>
         float ih = (1.0 - abs(iFbm(vWPos * 0.42) * 2.0 - 1.0)) * 1.25
           + (1.0 - abs(iNoise(vWPos * 1.7) * 2.0 - 1.0)) * 0.4
-          + iNoise(vWPos * 3.4) * 0.26 + iNoise(vWPos * 11.0) * 0.08;
+          + iNoise(vWPos * 3.4) * 0.26 * iNearA + iNoise(vWPos * 11.0) * 0.08 * iNearB;
         ih -= (1.0 - crack) * 0.22;
-        normal = iBump(-vViewPosition, normal, ih, mix(2.4, 0.5, iGround));`
+        normal = iBump(-vViewPosition, normal, ih, mix(2.4, 0.5, iGround) * mix(0.4, 1.0, iNearA));`
       );
   };
   mat.customProgramCacheKey = () => "isle-rock";
@@ -335,10 +360,11 @@ function isClear(x, z) {
   return true;
 }
 
-function buildGrass(count, env) {
+function buildGrass(count, env, shade = []) {
   const rand = rng(77);
   const offs = new Float32Array(count * 3);
   const par = new Float32Array(count * 4);
+  const shd = new Float32Array(count);
   let n = 0, guard = 0;
   while (n < count && guard++ < count * 12) {
     const th = rand() * Math.PI * 2;
@@ -358,12 +384,19 @@ function buildGrass(count, env) {
     par[n * 4 + 1] = rand() * 6.283; // phase
     par[n * 4 + 2] = Math.min(1, Math.max(0, 0.45 + fbm2(x * 0.045 - 8, z * 0.045 + 22, 2) * 1.1 + (rand() - 0.5) * 0.45)); // dry-to-lush tint
     par[n * 4 + 3] = rand() * 6.283; // facing
+    let sh = 1;
+    for (const o of shade) {
+      const d = Math.hypot(x - o.x, z - o.z);
+      if (d < o.r) sh *= 1 - 0.5 * (1 - smoothstep(o.r * 0.3, o.r, d));
+    }
+    shd[n] = sh;
     n++;
   }
   const geo = bladeGeometry();
   geo.instanceCount = n;
   geo.setAttribute("aOffset", new THREE.InstancedBufferAttribute(offs.subarray(0, n * 3), 3));
   geo.setAttribute("aParams", new THREE.InstancedBufferAttribute(par.subarray(0, n * 4), 4));
+  geo.setAttribute("aShade", new THREE.InstancedBufferAttribute(shd.subarray(0, n), 1));
   geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 10, 0), R * 1.3);
 
   const mat = new THREE.ShaderMaterial({
@@ -380,7 +413,10 @@ function buildGrass(count, env) {
     vertexShader: /* glsl */ `
       attribute vec3 aOffset;
       attribute vec4 aParams;
+      attribute float aShade;
       uniform float uTime, uWind;
+      varying float vFar;
+      varying float vShade;
       varying float vT;
       varying float vTint;
       varying float vFlower;
@@ -393,7 +429,12 @@ function buildGrass(count, env) {
         float gust = sin(uTime * 1.5 + aOffset.x * 0.19 + aOffset.z * 0.15 + aParams.y) * 0.6
                    + sin(uTime * 0.6 + aOffset.x * 0.045 - aOffset.z * 0.03) * 0.7;
         float bend = (0.22 + fract(aParams.y) * 0.25 + gust * uWind * 0.35) * t * t * h;
-        vec3 p = vec3(position.x * 0.075 * (0.75 + h * 0.4), t * h - bend * bend * 0.3, bend);
+        // far blades get wider, so the field reads as soft turf instead of noise
+        float gd = length((viewMatrix * vec4(aOffset, 1.0)).xyz);
+        float wide = 1.0 + clamp((gd - 16.0) * 0.05, 0.0, 6.0);
+        vFar = smoothstep(22.0, 150.0, gd);
+        vShade = aShade;
+        vec3 p = vec3(position.x * 0.075 * wide * (0.75 + h * 0.4), t * h - bend * bend * 0.3, bend);
         vec3 q = vec3(p.x * ca - p.z * sa, p.y, p.x * sa + p.z * ca);
         q.x += gust * uWind * t * t * h * 0.55;
         vec4 mv = viewMatrix * vec4(aOffset + q, 1.0);
@@ -407,6 +448,8 @@ function buildGrass(count, env) {
     fragmentShader: /* glsl */ `
       uniform vec3 uSunCol, uAmbCol, uSunDir, uFogCol;
       uniform float uFogDen;
+      varying float vFar;
+      varying float vShade;
       varying float vT;
       varying float vTint;
       varying float vFlower;
@@ -414,14 +457,15 @@ function buildGrass(count, env) {
       varying vec3 vN;
       void main(){
         vec3 root = vec3(0.045, 0.10, 0.02);
-        vec3 tip = mix(vec3(0.17, 0.34, 0.07), vec3(0.40, 0.45, 0.13), smoothstep(0.25, 0.95, vTint));
+        vec3 tip = mix(vec3(0.13, 0.27, 0.06), vec3(0.33, 0.37, 0.12), smoothstep(0.25, 0.95, vTint));
         vec3 col = mix(root, tip, pow(vT, 0.8));
+        col = mix(col, mix(root, tip, 0.62), vFar * 0.8);
         float flower = vFlower * smoothstep(0.78, 0.9, vT);
         col = mix(col, vec3(0.95, 0.9, 0.72), flower);
         float lam = 0.5 + 0.5 * clamp(dot(normalize(vN), uSunDir), 0.0, 1.0);
         float sheen = pow(vT, 3.0) * 0.35 * max(uSunDir.y, 0.0);
         vec3 lit = col * (uAmbCol * 0.9 + uSunCol * (lam * 0.75 + sheen));
-        lit *= mix(0.5, 1.0, vT);
+        lit *= mix(mix(0.5, 1.0, vT), 0.82, vFar) * vShade;
         float f = 1.0 - exp(-uFogDen * uFogDen * vDist * vDist);
         gl_FragColor = vec4(mix(lit, uFogCol, f), 1.0);
         #include <tonemapping_fragment>
@@ -483,32 +527,52 @@ function buildStones(count) {
 
 function buildIslets() {
   const group = new THREE.Group();
-  const spots = [
-    { p: [78, 14, -38], s: 9, seed: 1.7 },
-    { p: [-86, -6, 22], s: 12, seed: 5.2 },
-    { p: [-58, 30, -64], s: 6.5, seed: 9.1 },
-    { p: [52, -20, 74], s: 7.5, seed: 12.6 },
-    { p: [18, 38, -92], s: 5, seed: 15.4 },
-    { p: [96, 4, 40], s: 4, seed: 21.9 },
-  ];
-  for (const it of spots) {
+  for (const it of ISLETS) {
     const mesh = new THREE.Mesh(
       lumpGeometry(5, it.seed, true),
       makeRockMaterial({ ground: 1, topMask: 0, baseY: it.p[1] + 30 })
     );
     mesh.position.set(...it.p);
     mesh.scale.set(it.s, it.s * 0.85, it.s);
-    mesh.rotation.y = it.seed;
-    mesh.castShadow = true;
+    mesh.rotation.y = it.fixed ? 0 : it.seed;
+    mesh.castShadow = !it.fixed;
     mesh.receiveShadow = true;
-    mesh.userData.bob = { y: it.p[1], phase: it.seed, amp: 0.5 + it.s * 0.05 };
+    mesh.userData.bob = it.fixed ? null : { y: it.p[1], phase: it.seed, amp: 0.5 + it.s * 0.05 };
     group.add(mesh);
   }
   return group;
 }
 
+// loose rock drifting between the islands
+function buildDebris(count) {
+  const rand = rng(2718);
+  const geo = lumpGeometry(2, 7.7, false);
+  const mesh = new THREE.InstancedMesh(geo, makeRockMaterial({ ground: 0, topMask: 0, baseY: 40 }), count);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
+  const sc = new THREE.Vector3(), ps = new THREE.Vector3();
+  for (let i = 0; i < count; i++) {
+    const near = ISLETS[Math.floor(rand() * ISLETS.length)];
+    if (rand() < 0.55) {
+      const a = rand() * Math.PI * 2, r = near.s * (1.1 + rand() * 1.6);
+      ps.set(near.p[0] + Math.cos(a) * r, near.p[1] - near.s * (0.2 + rand() * 1.1), near.p[2] + Math.sin(a) * r);
+    } else {
+      const a = rand() * Math.PI * 2, r = 30 + rand() * 40;
+      ps.set(Math.cos(a) * r, -58 - rand() * 26, Math.sin(a) * r);
+    }
+    const s = 0.35 + Math.pow(rand(), 2) * 2.4;
+    e.set(rand() * 6.28, rand() * 6.28, rand() * 6.28);
+    sc.set(s, s * (0.7 + rand() * 0.8), s);
+    m.compose(ps, q.setFromEuler(e), sc);
+    mesh.setMatrixAt(i, m);
+  }
+  mesh.castShadow = false;
+  mesh.receiveShadow = true;
+  mesh.frustumCulled = false;
+  return mesh;
+}
+
 // ── Assemble ───────────────────────────────────────────────────────────────
-export function buildIsland(env, quality) {
+export function buildIsland(env, quality, shade = []) {
   const group = new THREE.Group();
   const rock = makeRockMaterial();
 
@@ -520,9 +584,10 @@ export function buildIsland(env, quality) {
     group.add(m);
   }
 
-  const grass = buildGrass(quality.grass, env);
+  const grass = buildGrass(quality.grass, env, shade);
   group.add(grass);
   group.add(buildStones(quality.high ? 520 : 260));
+  group.add(buildDebris(quality.high ? 110 : 60));
 
   const islets = buildIslets();
   group.add(islets);
@@ -532,6 +597,7 @@ export function buildIsland(env, quality) {
     update(time) {
       for (const m of islets.children) {
         const b = m.userData.bob;
+        if (!b) continue;
         m.position.y = b.y + Math.sin(time * 0.25 + b.phase) * b.amp;
         m.rotation.y = b.phase + time * 0.012;
       }

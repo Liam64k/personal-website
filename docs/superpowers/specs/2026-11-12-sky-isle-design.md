@@ -93,3 +93,20 @@ Exact camera keyframes, colour values, densities and timing, tuned by screenshot
 Screenshots of every chapter at desktop and phone size; scroll forward, back and jump;
 console clean; reduced-motion and no-WebGL paths; one independent adversarial review
 against every request in the conversation.
+
+## Revision 2 (2026-11-12): more realism, less bland
+
+Asked for after the first build: smoother and more realistic visuals, a better
+workshop, more clouds and islands, and the fitness facts moved out of the intro.
+
+- A finishing pass (`world/post.js`): multisampled HDR buffer, bloom, sun shafts,
+  film tone curve, vignette. `?nopost` turns it off; `?msaa=N` sets the sample count.
+- Fine rock detail and thin grass blades fade or widen with distance, which removes
+  the grainy look at range.
+- The cabin is replaced by a round stone forge-tower with a green copper roof, a
+  copper flue, a forge mouth and a wind rotor.
+- New: a great blossom tree with falling petals, groves, vines under the rim, nine
+  more islets (four large, with trees), drifting rock, thunderheads on the horizon,
+  birds, fireflies at dusk, and an airship moored at the landing.
+- Content: Summit is now a short placeholder intro. The gym, Muay Thai, rock
+  climbing and the 50 km run sit under Online personal training, with the photo.

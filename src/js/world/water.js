@@ -88,8 +88,11 @@ export function buildWater(env) {
         vec3 water = mix(vec3(0.05, 0.2, 0.22), uSky * 0.6 + 0.15, 0.5);
         vec3 foam = vec3(0.92, 0.96, 1.0);
         vec3 col = mix(water, foam, clamp(fall * (0.35 + body * 0.75) + fine * 0.2, 0.0, 1.0));
-        col *= uAmbCol * 1.5 + uSunCol * 0.75;
-        gl_FragColor = vec4(col, a);
+        vec3 light = uAmbCol * 1.5 + uSunCol * 0.75;
+        light = mix(light, vec3(dot(light, vec3(0.333))), 0.6);   // water stays pale, whatever the sun is doing
+        col *= light;
+        a *= mix(1.0, 0.55 + 0.45 * streak, fall);
+        gl_FragColor = vec4(col, a * 0.92);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`,
@@ -110,14 +113,14 @@ export function buildWater(env) {
       const rad = startR + (rim - 0.6 - startR) * t;
       cx = dir.x * rad; cz = dir.y * rad;
       cy = Math.min(level, topHeight(cx, cz) + 0.22);
-      width = 1.5 + t * 0.3;
+      width = 0.9 + t * 0.3;
       lipY = cy;
     } else {
       const t = (i - GROUND) / FALL;
       const out = rim - 0.6 + Math.pow(t, 0.55) * 8.5 + t * 4;
       cx = dir.x * out; cz = dir.y * out;
       cy = lipY - t * 3 - t * t * 66;
-      width = 1.8 + t * 2.6;
+      width = 1.2 + t * 2.4;
     }
     for (let j = 0; j <= ACROSS; j++) {
       const a = j / ACROSS - 0.5;
