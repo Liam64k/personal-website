@@ -114,6 +114,15 @@ export function createPage() {
     root.classList.toggle("past-hero", c > 0.5);
   }
 
+  // keyboard: when focus moves into a chapter that is not showing, go to it
+  chapters.forEach((el, i) => {
+    el.addEventListener("focusin", () => {
+      if (!el.classList.contains("is-active") && !root.classList.contains("no-webgl")) {
+        window.scrollTo({ top: tops[i] + 2, behavior: "instant" });
+      }
+    });
+  });
+
   // ── dialog, copy button ──────────────────────────────────────────────────
   const dialog = document.getElementById("photo");
   document.getElementById("open-photo")?.addEventListener("click", () => dialog.showModal());
@@ -140,6 +149,7 @@ export function createPage() {
     },
     start() {
       ready = true;
+      root.classList.add("is-ready");
       loader.classList.add("is-done");
       update(progress());
     },

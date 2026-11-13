@@ -1,7 +1,7 @@
 // Trees (one great blossom tree and small groves), falling petals, and the
 // vines that hang from the island's rim.
 import * as THREE from "three";
-import { topHeight, rimRadius, pathDistance, makeRockMaterial, PADS, ISLETS } from "./island.js";
+import { topHeight, rimRadius, pathDistance, makeRockMaterial, smoothNormals, PADS, ISLETS } from "./island.js";
 import { noise3, fbm3, rng, GLSL_NOISE } from "./noise.js";
 import { STOPS } from "./journey.js";
 
@@ -34,7 +34,7 @@ export function planTrees() {
   }
   for (const it of ISLETS) {
     if (!it.trees) continue;
-    const top = it.p[1] + 0.17 * it.s * 0.85;
+    const top = it.p[1] + 0.25 * it.s * 0.85;
     for (let i = 0; i < it.trees; i++) {
       const a = it.seed + i * 2.4, rad = it.s * 0.32 * (i ? 1 : 0.2);
       trees.push({ x: it.p[0] + Math.cos(a) * rad, z: it.p[2] + Math.sin(a) * rad, y: top, s: 0.8 + (i % 2) * 0.35, great: false, islet: true });
@@ -80,8 +80,7 @@ function lumpGeometry() {
     const d = 1 + fbm3(x * 1.5 + 4, y * 1.5, z * 1.5 - 2, 3) * 0.42 + noise3(x * 4.2, y * 4.2, z * 4.2) * 0.07;
     p.setXYZ(i, x * d, y * d * 0.82, z * d);
   }
-  g.computeVertexNormals();
-  return g;
+  return smoothNormals(g);
 }
 
 // ── foliage material: leafy colour break-up, soft bump, light through leaves ─
@@ -130,16 +129,18 @@ function foliageMaterial(env) {
         // leaves, not balloons: break the silhouette and open gaps into the canopy
         float leaf = iNoise(vWPos * 6.0) * 0.6 + iNoise(vWPos * 14.0) * 0.4;
         float rimward = 1.0 - abs(dot(normalize(vNormal), normalize(vViewPosition)));
-        float cut = mix(0.16, 0.68, smoothstep(0.25, 0.95, rimward)) * fNear;
+        // only cut leaves out up close; further away the pattern would turn to grain
+        float cutNear = 1.0 - smoothstep(20.0, 55.0, fDist);
+        float cut = mix(0.16, 0.68, smoothstep(0.25, 0.95, rimward)) * cutNear;
         if (leaf < cut) discard;
         float depth = smoothstep(cut, cut + 0.3, leaf);
-        diffuseColor.rgb *= (0.5 + fa * 0.6 + (clump - 0.5) * 0.35 * fNear) * mix(1.0, 0.55 + 0.45 * depth, fNear);
+        diffuseColor.rgb *= (0.5 + fa * 0.6 + (clump - 0.5) * 0.35 * fNear) * mix(1.0, 0.55 + 0.45 * depth, cutNear);
         if (!gl_FrontFacing) diffuseColor.rgb *= 0.55;`
       )
       .replace(
         "#include <normal_fragment_maps>",
         /* glsl */ `#include <normal_fragment_maps>
-        float fh = iNoise(vWPos * 2.3) * 0.9 + leaf * 0.7 * fNear;
+        float fh = iNoise(vWPos * 2.3) * 0.9 + leaf * 0.7 * cutNear;
         normal = fBump(-vViewPosition, normal, fh, 2.2 * (0.3 + 0.7 * fNear));`
       )
       .replace(
@@ -272,7 +273,7 @@ export function buildFlora(env, plan, quality) {
         p.y = uBase + (1.0 - t) * 20.0;
         p.x += sin(uTime * 0.6 + aSeed.x) * 1.6 + t * 7.0;
         p.z += cos(uTime * 0.5 + aSeed.x * 1.7) * 1.6 + t * 2.5;
-        vFade = smoothstep(0.0, 0.08, t) * smoothstep(1.0, 0.86, t);
+        vFade = smoothstep(0.0, 0.08, t) * (1.0 - smoothstep(0.86, 1.0, t));
         vSpin = aSeed.x + uTime * (1.5 + aSeed.z * 2.0);
         vec4 mv = modelViewMatrix * vec4(p, 1.0);
         gl_PointSize = uScale * (9.0 + aSeed.z * 8.0) / max(1.0, -mv.z * 0.06);
@@ -287,7 +288,7 @@ export function buildFlora(env, plan, quality) {
         float c = cos(vSpin), s = sin(vSpin);
         q = vec2(q.x * c - q.y * s, q.x * s + q.y * c);
         q.y *= 1.0 + abs(sin(vSpin * 0.7)) * 2.2;       // tumble: the petal thins to an edge
-        float a = smoothstep(0.5, 0.36, length(q * vec2(1.0, 1.25)));
+        float a = 1.0 - smoothstep(0.36, 0.5, length(q * vec2(1.0, 1.25)));
         if (a < 0.02) discard;
         vec3 col = vec3(1.0, 0.72, 0.82) * (uAmbCol * 1.25 + uSunCol * 0.7);
         gl_FragColor = vec4(col, a * vFade);

@@ -1,7 +1,7 @@
-// The five stops on the island: summit cairn, workshop cabin, lab screens,
+// The five stops on the island: summit cairn, forge-tower workshop, lab screens,
 // beacon towers and the landing jetty.
 import * as THREE from "three";
-import { topHeight, makeRockMaterial, PADS, SUMMIT } from "./island.js";
+import { topHeight, makeRockMaterial, smoothNormals, PADS, SUMMIT } from "./island.js";
 import { noise3, rng } from "./noise.js";
 
 const rand = rng(5150);
@@ -19,30 +19,6 @@ function glowTexture() {
   ctx.fillRect(0, 0, 128, 128);
   const t = new THREE.CanvasTexture(cv);
   t.colorSpace = THREE.SRGBColorSpace;
-  return t;
-}
-
-function plankTexture() {
-  const cv = document.createElement("canvas");
-  cv.width = 256; cv.height = 256;
-  const ctx = cv.getContext("2d");
-  for (let row = 0; row < 8; row++) {
-    const l = 30 + rand() * 12;
-    ctx.fillStyle = `hsl(${24 + rand() * 8}, ${32 + rand() * 12}%, ${l}%)`;
-    ctx.fillRect(0, row * 32, 256, 32);
-    for (let i = 0; i < 60; i++) {
-      ctx.fillStyle = `rgba(0,0,0,${0.03 + rand() * 0.06})`;
-      ctx.fillRect(rand() * 256, row * 32 + rand() * 32, 20 + rand() * 90, 1);
-    }
-    ctx.fillStyle = "rgba(0,0,0,0.45)";
-    ctx.fillRect(0, row * 32, 256, 2);
-    const seam = rand() * 256;
-    ctx.fillRect(seam, row * 32, 2, 32);
-  }
-  const t = new THREE.CanvasTexture(cv);
-  t.colorSpace = THREE.SRGBColorSpace;
-  t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.anisotropy = 4;
   return t;
 }
 
@@ -79,7 +55,7 @@ function buildSummit(stone, env) {
   let y = 0;
   const sizes = [1.05, 0.9, 0.74, 0.6, 0.46, 0.32];
   sizes.forEach((s, i) => {
-    const geo = roughen(new THREE.IcosahedronGeometry(1, 2), 0.22, 1.4, i * 3.1);
+    const geo = smoothNormals(roughen(new THREE.IcosahedronGeometry(1, 2), 0.22, 1.4, i * 3.1));
     const m = shadowed(new THREE.Mesh(geo, stone));
     m.scale.set(s * 1.25, s * 0.52, s * 1.1);
     y += s * 0.42;
@@ -397,6 +373,7 @@ function buildWorkshop(stone, glowTex) {
   }
   const mouthPos = mouth.position.clone();
   const mouthOut = new THREE.Vector3(Math.sin(mouthA), 0, Math.cos(mouthA));
+  const emberOff = new THREE.Vector3();
 
   return {
     group: g,
@@ -424,7 +401,7 @@ function buildWorkshop(stone, glowTex) {
         const k = s.userData.k;
         s.position.copy(mouthPos)
           .addScaledVector(mouthOut, 0.3 + t * 1.6)
-          .add(new THREE.Vector3(Math.sin(k + t * 5) * 0.35, t * 2.6 - 0.2, Math.cos(k * 1.7 + t * 4) * 0.35));
+          .add(emberOff.set(Math.sin(k + t * 5) * 0.35, t * 2.6 - 0.2, Math.cos(k * 1.7 + t * 4) * 0.35));
         const size = 0.16 * (1 - t) + 0.05;
         s.scale.set(size, size, 1);
         s.material.opacity = (1 - t) * 0.9;
@@ -792,7 +769,6 @@ export function buildLandmarks(env, content) {
 
   return {
     group,
-    summitFocus: summit.focus,
     screens: lab.screens,
     towers: towers.towers,
     update(time, dt, dusk) {

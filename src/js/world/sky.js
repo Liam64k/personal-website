@@ -29,7 +29,7 @@ export function buildSky(env) {
         vec3 d = normalize(vDir);
         float up = max(d.y, 0.0);
         vec3 col = mix(uHorizon, uZenith, pow(up, 0.5));
-        col = mix(col, uBelow, smoothstep(0.02, -0.4, d.y));
+        col = mix(col, uBelow, 1.0 - smoothstep(-0.4, 0.02, d.y));
         float sd = max(dot(d, uSunDir), 0.0);
         // warm wash around the sun, then halo, then disc
         col += uSunCol * (pow(sd, 5.0) * 0.16 + pow(sd, 48.0) * 0.3 + pow(sd, 1400.0) * 9.0);
@@ -236,7 +236,7 @@ export function buildClouds(env, quality) {
 
   const mesh = new THREE.Mesh(geo, mat);
   mesh.frustumCulled = false;
-  mesh.renderOrder = 5;
+  mesh.renderOrder = -1; // before glows, beams, steam and water, which sit in front of far cloud
 
   const order = new Uint32Array(N);
   const depth = new Float32Array(N);

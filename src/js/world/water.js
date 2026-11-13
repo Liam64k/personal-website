@@ -8,7 +8,7 @@ export function buildWater(env) {
   const pond = PADS.pond;
   const dir = new THREE.Vector2(Math.cos(pond.angle), Math.sin(pond.angle));
   const side = new THREE.Vector2(-dir.y, dir.x);
-  const level = pond.h + 0.55;
+  const level = pond.h + 0.32;
 
   const uniforms = {
     uTime: env.uTime,
@@ -52,13 +52,13 @@ export function buildWater(env) {
         vec3 col = mix(deep, sky, 0.35 + fres * 0.6) * (uAmbCol * 1.6 + uSunCol * 0.5);
         vec3 h = normalize(view + uSunDir);
         col += uSunCol * pow(max(dot(nrm, h), 0.0), 220.0) * 2.5;
-        float edge = smoothstep(1.0, 0.86, length(vUv - 0.5) * 2.0);
+        float edge = 1.0 - smoothstep(0.8, 1.0, length(vUv - 0.5) * 2.0);
         gl_FragColor = vec4(col, 0.9 * edge);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`,
   });
-  const pondMesh = new THREE.Mesh(new THREE.CircleGeometry(6.2, 48), pondMat);
+  const pondMesh = new THREE.Mesh(new THREE.CircleGeometry(4.3, 48), pondMat);
   pondMesh.rotation.x = -Math.PI / 2;
   pondMesh.position.set(pond.x, level, pond.z);
   group.add(pondMesh);
@@ -81,7 +81,7 @@ export function buildWater(env) {
         float speed = mix(1.1, 3.4, fall);
         float streak = iFbm3(vec3(vUv.x * 7.0, vUv.y * mix(18.0, 9.0, fall) - uTime * speed, 1.3));
         float fine = iNoise(vec3(vUv.x * 26.0, vUv.y * 40.0 - uTime * speed * 2.4, 4.0));
-        float across = smoothstep(0.0, 0.34, vUv.x) * smoothstep(1.0, 0.66, vUv.x);
+        float across = smoothstep(0.0, 0.34, vUv.x) * (1.0 - smoothstep(0.66, 1.0, vUv.x));
         float body = smoothstep(0.28, 0.7, streak * 0.75 + fine * 0.35);
         float a = across * mix(0.8, 0.25 + body * 0.75, fall);
         a *= 1.0 - smoothstep(0.62, 1.0, vUv.y);           // dissolve into mist
@@ -100,7 +100,7 @@ export function buildWater(env) {
 
   // one ribbon: along the ground from the pond to the rim, then over the edge
   const rim = rimRadius(pond.angle);
-  const startR = Math.hypot(pond.x, pond.z) + 4.6;
+  const startR = Math.hypot(pond.x, pond.z) + 3.3;
   const GROUND = 10, FALL = 46, ACROSS = 6;
   const rows = GROUND + FALL + 1;
   const pos = new Float32Array(rows * (ACROSS + 1) * 3);

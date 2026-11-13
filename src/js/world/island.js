@@ -202,7 +202,7 @@ export function makeRockMaterial({ ground = 1, topMask = 1, baseY = 0, tint = nu
         rock *= 0.72 + 0.4 * in3 + 0.16 * in4;
         float crack = smoothstep(0.42, 0.5, abs(iNoise(vWPos * 0.9 + 3.0) - 0.5) * 2.0);
         rock *= mix(0.74, 1.0, crack);
-        float under = smoothstep(1.0, -42.0, vWPos.y - uBaseY);
+        float under = 1.0 - smoothstep(-42.0, 1.0, vWPos.y - uBaseY);
         rock *= mix(1.0, 0.5, under);
         rock = mix(rock, rock * vec3(0.82, 0.92, 1.1), under);
         float moss = smoothstep(0.3, 0.7, iwn.y) * smoothstep(0.45, 0.7, in2) * (1.0 - under);
@@ -477,6 +477,31 @@ function buildGrass(count, env, shade = []) {
   return mesh;
 }
 
+/**
+ * Icosahedron geometry has no shared vertices, so plain vertex normals come out
+ * faceted. This averages the face normals of every vertex at the same position.
+ */
+export function smoothNormals(geo) {
+  geo.computeVertexNormals();
+  const p = geo.attributes.position, n = geo.attributes.normal;
+  const sums = new Map();
+  const key = (i) => `${Math.round(p.getX(i) * 2000)}_${Math.round(p.getY(i) * 2000)}_${Math.round(p.getZ(i) * 2000)}`;
+  const keys = new Array(p.count);
+  for (let i = 0; i < p.count; i++) {
+    const k = (keys[i] = key(i));
+    let s = sums.get(k);
+    if (!s) sums.set(k, (s = [0, 0, 0]));
+    s[0] += n.getX(i); s[1] += n.getY(i); s[2] += n.getZ(i);
+  }
+  for (let i = 0; i < p.count; i++) {
+    const s = sums.get(keys[i]);
+    const l = Math.hypot(s[0], s[1], s[2]) || 1;
+    n.setXYZ(i, s[0] / l, s[1] / l, s[2] / l);
+  }
+  n.needsUpdate = true;
+  return geo;
+}
+
 // ── Stones and islets ──────────────────────────────────────────────────────
 function lumpGeometry(detail, seed, flatTop) {
   const g = new THREE.IcosahedronGeometry(1, detail);
@@ -492,7 +517,7 @@ function lumpGeometry(detail, seed, flatTop) {
     }
     p.setXYZ(i, x, y, z);
   }
-  g.computeVertexNormals();
+  smoothNormals(g);
   return g;
 }
 

@@ -117,7 +117,7 @@ export function buildLife(env, quality) {
       varying float vGlow;
       void main(){
         float d = length(gl_PointCoord - 0.5);
-        float a = smoothstep(0.5, 0.0, d);
+        float a = 1.0 - smoothstep(0.0, 0.5, d);
         vec3 col = mix(vec3(1.0, 0.97, 0.85), vec3(1.0, 0.82, 0.35), uDusk);
         gl_FragColor = vec4(col * a * a * vGlow * (1.0 + uDusk * 2.5), 1.0);
       }`,

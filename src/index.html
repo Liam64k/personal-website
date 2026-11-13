@@ -16,6 +16,26 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..700,0..100&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <script>
+    // If the 3D code cannot load or run, never leave the page behind the loader.
+    (function () {
+      var root = document.documentElement;
+      function open() {
+        if (root.classList.contains("is-ready")) return;
+        root.classList.add("no-webgl");
+        var loader = document.getElementById("loader");
+        if (loader) loader.classList.add("is-done");
+        document.querySelectorAll(".chapter").forEach(function (c) { c.classList.add("is-active"); });
+      }
+      window.addEventListener("error", function (e) {
+        // a script that failed to load, or code that threw; not a missing image
+        if (e.target === window || (e.target && e.target.tagName === "SCRIPT")) open();
+      }, true);
+      var maps = window.HTMLScriptElement && HTMLScriptElement.supports && HTMLScriptElement.supports("importmap");
+      if (!maps) document.addEventListener("DOMContentLoaded", open);
+      setTimeout(open, 20000);
+    })();
+  </script>
   <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
 </head>
 <body>
@@ -108,13 +128,13 @@
               <strong>AI Dashboard</strong><span>A personal dashboard that puts AI to work on my own day.</span></a></li>
             <li><a href="https://liam64k.github.io/convoy/" target="_blank" rel="noopener" data-screen="Convoy" data-kind="Game" data-hue="24">
               <strong>Convoy</strong><span>First-person survival on a pack of crashing, physics-driven trucks.</span></a></li>
-            <li><a href="https://liam64k.github.io/knuckleheads/" target="_blank" rel="noopener" data-screen="Knuckle heads" data-kind="Game" data-hue="340">
+            <li><a href="https://liam64k.github.io/knuckleheads/" target="_blank" rel="noopener" data-screen="Knuckleheads" data-kind="Game" data-hue="340">
               <strong>Knuckleheads</strong><span>A wobbly multiplayer brawler where each mouse button is a fist.</span></a></li>
             <li><a href="https://github.com/Liam64k/heatingmedia-website" target="_blank" rel="noopener" data-screen="Heating Media" data-kind="Website" data-hue="38">
               <strong>Heating Media website</strong><span>The site I designed and built for my agency.</span></a></li>
             <li><a href="https://github.com/Liam64k/gym-pr-app" target="_blank" rel="noopener" data-screen="Nexus Gym PR" data-kind="App" data-hue="150">
               <strong>Nexus Gym PR</strong><span>Logs every lift and tracks personal records over time.</span></a></li>
-            <li><a href="https://github.com/Liam64k/colourblind_application" target="_blank" rel="noopener" data-screen="Colour blind" data-kind="Accessibility" data-hue="185">
+            <li><a href="https://github.com/Liam64k/colourblind_application" target="_blank" rel="noopener" data-screen="Colourblind" data-kind="Accessibility" data-hue="185">
               <strong>Colourblind app</strong><span>A C# tool that helps colour-blind people tell colours apart.</span></a></li>
           </ul>
         </div>
@@ -175,7 +195,7 @@
     <form method="dialog"><button class="button button--quiet" autofocus>Close</button></form>
   </dialog>
 
-  <noscript><style>.loader{display:none}.chapter .reveal,.chapter .split{opacity:1;transform:none}</style></noscript>
+  <noscript><style>.loader{display:none}.chapter{height:auto;min-height:100vh}.stage{position:relative;height:auto;min-height:100vh}.stage,.panel,.print{pointer-events:auto}.chapter .reveal,.chapter .split .wi{opacity:1;transform:none}.panel::before{opacity:1;transform:none}</style></noscript>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

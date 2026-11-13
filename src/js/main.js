@@ -22,7 +22,11 @@ const nextFrame = () =>
     });
   });
 
+let dead = false;
+
 function fallback(reason) {
+  if (dead) return;
+  dead = true; // stops the frame loop, so it cannot fight the plain page
   console.warn("3D world unavailable:", reason);
   document.documentElement.classList.add("no-webgl");
   page.measure();
@@ -46,7 +50,7 @@ async function boot() {
   }
 
   const coarse = window.matchMedia("(pointer: coarse)").matches;
-  const small = Math.min(window.innerWidth, window.innerHeight) < 720;
+  const small = Math.min(window.innerWidth, window.innerHeight) < 560;
   const high = !coarse && !small;
   const quality = {
     high,
@@ -80,7 +84,6 @@ async function boot() {
   scene.add(hemi);
 
   // ── build, yielding between steps so the loader can paint ────────────────
-  const t0 = performance.now();
   page.setLoader(0.12, "Mixing the sky");
   await nextFrame();
   const sky = buildSky(env);
@@ -122,6 +125,9 @@ async function boot() {
   // ── sizing ───────────────────────────────────────────────────────────────
   let W = 1, H = 1, narrow = false;
   function resize() {
+    // phones fire resize whenever the address bar slides; that is not worth
+    // rebuilding every render buffer for
+    if (coarse && window.innerWidth === W && Math.abs(window.innerHeight - H) < 140) return;
     W = window.innerWidth; H = window.innerHeight;
     narrow = W / H < 0.85;
     renderer.setPixelRatio(dpr);
@@ -139,10 +145,12 @@ async function boot() {
   const pointer = new THREE.Vector2(0, 0);
   const ndc = new THREE.Vector2(0, 0);
   let pointerLive = false;
+  let overUi = false; // pointer is on text or a photo, so the 3D world should not react
   window.addEventListener("pointermove", (e) => {
     if (e.pointerType !== "mouse") return;
     ndc.set((e.clientX / W) * 2 - 1, -(e.clientY / H) * 2 + 1);
     pointerLive = true;
+    overUi = !!e.target.closest?.(".panel, .print, .topbar, .beacon, dialog");
   });
   document.addEventListener("pointerleave", () => (pointerLive = false));
 
@@ -169,7 +177,8 @@ async function boot() {
   });
 
   window.addEventListener("click", (e) => {
-    if (e.target.closest("a, button, dialog")) return;
+    if (e.target.closest("a, button, dialog, .panel, .print, .topbar")) return;
+    if (window.getSelection()?.toString()) return;
     if (hotTower >= 0) {
       const s = page.socials[hotTower];
       if (s.external) window.open(s.href, "_blank", "noopener"); else window.location.href = s.href;
@@ -186,6 +195,7 @@ async function boot() {
   let time = 0, slow = 0, frames = 0;
 
   function frame() {
+    if (dead) return;
     requestAnimationFrame(frame);
     if (document.hidden) return;
     step(clock.getDelta());
@@ -230,7 +240,7 @@ async function boot() {
     // hover
     let tower = domTower, screen = domScreen;
     const nearTowers = Math.abs(smooth - 4) < 0.3, nearLab = Math.abs(smooth - 3) < 0.3;
-    if (pointerLive && (nearTowers || nearLab)) {
+    if (pointerLive && !overUi && (nearTowers || nearLab)) {
       ray.setFromCamera(ndc, camera);
       if (nearTowers && tower < 0) {
         const hit = ray.intersectObjects(towerProxies, false)[0];
@@ -277,7 +287,7 @@ async function boot() {
     // if frames run long, trade resolution for smoothness
     // (frames longer than 100 ms are a throttled tab, not a slow GPU)
     if (raw < 0.1) slow += (raw * 1000 - slow) * 0.05;
-    if (++frames > 120 && slow > 29 && dpr > 1) {
+    if (++frames > 120 && slow > 42 && dpr > 1) {
       slow = 16;
       dpr = Math.max(1, dpr - 0.25);
       resize();
@@ -291,19 +301,20 @@ async function boot() {
   cameraAt(smooth, narrow, cam);
   camera.position.copy(cam.pos);
   camera.lookAt(cam.target);
-  renderer.compile(scene, camera);
   frame();
   page.setLoader(1);
   await nextFrame();
+  if (dead) return;
+  document.documentElement.classList.remove("no-webgl");
   page.start();
-  console.info(`Island ready in ${Math.round(performance.now() - t0)} ms`);
 
   canvas.addEventListener("webglcontextlost", (e) => {
     e.preventDefault();
     fallback("context lost");
   });
 
-  window.__isle = {
+  // test helpers, only with ?debug in the address
+  if (params.has("debug")) window.__isle = {
     camera, scene, renderer, STOPS,
     go(i) {
       window.scrollTo({ top: page.chapters[i].offsetTop + 2, behavior: "instant" });

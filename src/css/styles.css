@@ -231,7 +231,7 @@ p { max-width: 34rem; color: var(--ink-soft); }
 .venture em {
   display: inline-block; margin-left: 0.4rem; padding: 0.12rem 0.55rem; vertical-align: middle;
   font-family: var(--text); font-style: normal; font-weight: 600; font-size: 0.74rem; letter-spacing: 0;
-  color: var(--cloud); background: var(--signal); border-radius: 999px;
+  color: var(--cloud); background: #c2330f; border-radius: 999px;
 }
 .link {
   justify-self: start; color: var(--ink); font-weight: 600;
@@ -320,6 +320,7 @@ p { max-width: 34rem; color: var(--ink-soft); }
 .no-webgl .chapter { height: auto; min-height: 100vh; }
 .no-webgl .stage { position: relative; height: auto; min-height: 100vh; }
 .no-webgl .beacons, .no-webgl .whiteout { display: none; }
+.no-webgl .stage, .no-webgl .panel, .no-webgl .print { pointer-events: auto; }
 
 /* ── Phones ────────────────────────────────────────────────────────────── */
 @media (max-width: 760px) {
@@ -344,6 +345,21 @@ p { max-width: 34rem; color: var(--ink-soft); }
   .beacon { padding: 0.4rem; }
 }
 
+/* ── Short windows (landscape phones, heavy zoom) ──────────────────────── */
+@media (max-height: 640px) {
+  body { font-size: 0.94rem; line-height: 1.45; }
+  .stage { padding-top: 3.4rem; padding-bottom: 1rem; }
+  .panel { gap: 0.55rem; }
+  h1 { font-size: clamp(2.6rem, 14vh, 5rem); }
+  h2 { font-size: clamp(1.5rem, 7vh, 2.2rem); }
+  .projects a { padding-top: 0.22rem; padding-bottom: 0.24rem; }
+  .projects span { font-size: 0.84rem; }
+  .venture { padding-top: 0.5rem; gap: 0.25rem; }
+  .facts li { padding-top: 0.45rem; padding-bottom: 0.4rem; }
+  .print--hero { width: 22vh; bottom: 6vh; }
+  .colophon { display: none; }
+}
+
 /* ── Reduced motion ────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -351,6 +367,8 @@ p { max-width: 34rem; color: var(--ink-soft); }
   .chapter.is-active .reveal, .chapter.is-active .split .wi {
     transition: opacity 0.2s linear; transform: none;
   }
+  .chapter:not(.is-active) .split { opacity: 0; }
+  .split { transition: opacity 0.2s linear; }
   .cue__line, .chapter.is-active .print--hero, .photo[open] { animation: none; }
   .cue__line { transform: none; }
 }

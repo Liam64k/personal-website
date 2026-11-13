@@ -4,6 +4,6 @@
   "private": true,
   "scripts": {
     "build": "echo \"Static site: serving src/\"",
-    "dev": "npx --yes live-server src"
+    "dev": "node scripts/serve.mjs"
   }
 }

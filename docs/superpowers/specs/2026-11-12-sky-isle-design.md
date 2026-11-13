@@ -37,8 +37,8 @@ focus. The content rides on top of it.
 | Chapter | Content |
 |---|---|
 | Hero | Name, "AI engineer and founder", desk photo. Camera drifts down through cloud. |
-| Summit | 17 years old, 50 km run, rock climbing, Muay Thai (training photo opens from here). |
-| Workshop | Heating Media (marketing agency for HVAC companies) → heatingmedia.com. Online personal training, coming soon. |
+| Summit | Short intro: 17 years old, AI engineer and founder (placeholder facts). |
+| Workshop | Heating Media (marketing agency for HVAC companies) → heatingmedia.com. Online personal training, coming soon: gym, Muay Thai, rock climbing, 50 km run; the training photo opens from here. |
 | Lab | Seven projects as links: Nexus, AI Dashboard (`liam-stier`), Convoy, Knuckleheads, Heating Media website, Gym PR app, Colourblind app. |
 | Towers | Instagram `stierliam`, X `LiamStier64k`, GitHub `Liam64k`, email. Four beacon towers; hover pulses, click opens. |
 | Landing | Contact by email (liam.stier@gmail.com). |
@@ -79,7 +79,7 @@ names and need his check.
 - Text is real HTML above the canvas on a soft cloud-white haze, dark ink type.
   Fraunces for display, Hanken Grotesk for text.
 - Photos are treated as physical prints (white border, slight tilt). The desk photo
-  sits in the hero; the Muay Thai photo opens in a dialog from the Summit chapter.
+  sits in the hero; the Muay Thai photo opens in a dialog from the Workshop chapter.
 - Phones: fewer blades and puffs, lower pixel ratio, camera pulled back.
   `prefers-reduced-motion`: camera snaps between chapters, ambient motion off.
   No WebGL: a CSS sky and the full readable page.
